@@ -1,6 +1,7 @@
 <%- include('../partials/header') %>
 <% var ship = h.orderShipping(order); %>
 <% var cur = stat.customerStep(order.status); var cc = stat.customerColor(order.status); %>
+<% var _steps = stat.CUSTOMER_STEPS.length; var _fill = _steps > 1 ? (Math.max(0, Math.min(cur, _steps - 1)) / (_steps - 1) * 84).toFixed(1) : 0; %>
 <div class="page-head"><div class="wrap"><div class="crumb"><a href="/konto">Mein Konto</a> › <a href="/konto/bestellungen">Bestellungen</a> › <%= order.order_number %></div><h1>Bestellung <%= order.order_number %></h1></div></div>
 
 <section class="block">
@@ -9,20 +10,24 @@
       <%- include('../partials/account-nav') %>
       <div class="acct-content">
 
-        <div class="od-top">
+        <div class="od2-head">
           <div>
-            <span class="badge b-<%= cc %>" style="font-size:.82rem"><%= stat.customerLabel(order.status) %></span>
-            <% if (stat.customerNote(order.status)) { %><span style="font-size:.82rem;color:#a5540f;margin-left:8px"><%= stat.customerNote(order.status) %></span><% } %>
-            <div style="color:var(--muted);font-size:.9rem;margin-top:6px">Bestellt am <%= h.dateTimeDE(order.created_at) %></div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <strong style="font-size:1.15rem;font-family:'Poppins'"><%= order.order_number %></strong>
+              <span class="badge b-<%= cc %>"><%= stat.customerLabel(order.status) %></span>
+            </div>
+            <div style="color:var(--muted);font-size:.88rem;margin-top:5px">Bestellt am <%= h.dateTimeDE(order.created_at) %><% if (stat.customerNote(order.status)) { %> · <span style="color:#a5540f"><%= stat.customerNote(order.status) %></span><% } %></div>
           </div>
-          <% if (order.invoice_sent_at) { %>
-            <a class="btn btn-dark btn-sm" href="/konto/rechnung/<%= order.order_number %>.pdf" target="_blank">Rechnung (PDF)</a>
-          <% } %>
+          <div class="od2-total">
+            <div class="l">Gesamt</div>
+            <div class="n"><%= h.euro(totals.gross) %></div>
+            <% if (order.invoice_sent_at) { %><a class="btn btn-dark btn-sm" style="margin-top:10px" href="/konto/rechnung/<%= order.order_number %>.pdf" target="_blank">Rechnung (PDF)</a><% } %>
+          </div>
         </div>
 
-        <!-- Statusverlauf -->
-        <div class="panel" style="padding:26px 22px;margin-bottom:20px">
+        <div class="panel" style="padding:26px 22px;margin-bottom:16px">
           <div class="timeline">
+            <div class="tl-fill" style="width:<%= _fill %>%"></div>
             <% stat.CUSTOMER_STEPS.forEach(function(label,i){ var clx = i<cur?'done':(i===cur?'active':''); %>
               <div class="tl-step <%= clx %>">
                 <div class="tl-dot"><%= i<cur ? '✓' : (i+1) %></div>
@@ -32,8 +37,7 @@
           </div>
         </div>
 
-        <!-- Artikel -->
-        <div class="panel" style="margin-bottom:20px">
+        <div class="panel" style="margin-bottom:16px">
           <div class="phead"><h2>Artikel</h2></div>
           <div class="oc-items" style="padding:4px 14px">
             <% items.forEach(function(it){ var link = it.product_slug ? ('/produkt/'+it.product_slug) : null; %>
@@ -55,43 +59,42 @@
           </div>
         </div>
 
-        <!-- Adresse & Zahlung -->
-        <div class="od-cols">
-          <div class="panel">
-            <div class="phead"><h2>Lieferadresse<% if (ship.different) { %> (abweichend)<% } %></h2></div>
-            <div style="padding:16px 20px;font-size:.92rem;line-height:1.8">
+        <div class="od2-info">
+          <div class="od2-card">
+            <h3>Lieferadresse<% if (ship.different) { %> (abweichend)<% } %></h3>
+            <div style="font-size:.9rem;line-height:1.8">
               <% if (ship.company){ %><strong><%= ship.company %></strong><br><% } %>
               <%= (ship.first_name+' '+ship.last_name).trim() %><br>
               <%= ship.street %><br>
               <%= (ship.zip+' '+ship.city).trim() %><br>
               <%= ship.country %>
               <% if (ship.different) { %>
-                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-                  <span style="color:var(--muted);font-size:.82rem">Rechnungsadresse:</span><br>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+                  <span style="color:var(--muted);font-size:.8rem">Rechnungsadresse</span><br>
                   <% if (order.cust_company){ %><%= order.cust_company %><br><% } %>
-                  <%= (order.cust_first_name||'')+' '+(order.cust_last_name||'') %><br>
-                  <%= order.cust_street || '' %>, <%= (order.cust_zip||'')+' '+(order.cust_city||'') %>
+                  <%= ((order.cust_first_name||'')+' '+(order.cust_last_name||'')).trim() %><br>
+                  <%= order.cust_street || '' %>, <%= ((order.cust_zip||'')+' '+(order.cust_city||'')).trim() %>
                 </div>
               <% } %>
-              <div style="margin-top:8px;color:var(--muted)"><%= order.cust_email %> · <%= order.cust_phone || '' %></div>
+              <div style="margin-top:8px;color:var(--muted)"><%= order.cust_email %><% if (order.cust_phone) { %> · <%= order.cust_phone %><% } %></div>
             </div>
           </div>
-          <div class="panel">
-            <div class="phead"><h2>Zahlung & Versand</h2></div>
-            <div style="padding:16px 20px;font-size:.92rem;line-height:1.9">
-              <span style="color:var(--muted)">Zahlungsart:</span> <%= order.payment_method === 'rechnung' ? 'Kauf auf Rechnung' : 'Vorkasse – Rechnung per E-Mail' %><br>
+          <div class="od2-card">
+            <h3>Zahlung &amp; Versand</h3>
+            <div style="font-size:.9rem;line-height:1.95">
+              <span style="color:var(--muted)">Zahlungsart</span> <%= order.payment_method === 'rechnung' ? 'Kauf auf Rechnung' : 'Vorkasse – Rechnung per E-Mail' %><br>
               <% if (order.invoice_sent_at) { %>
-                <span style="color:var(--muted)">Rechnung versendet:</span> <%= h.dateTimeDE(order.invoice_sent_at) %><br>
-                <span style="color:var(--muted)">Zahlungsziel:</span> <%= order.payment_days || '14' %> Werktage
+                <span style="color:var(--muted)">Rechnung versendet</span> <%= h.dateTimeDE(order.invoice_sent_at) %><br>
+                <span style="color:var(--muted)">Zahlungsziel</span> <%= order.payment_days || '14' %> Werktage<br>
               <% } else { %>
-                <span style="color:var(--muted)">Status:</span> Ihre Rechnung wird nach Prüfung per E-Mail versendet.
+                <span style="color:var(--muted)">Status</span> Rechnung folgt nach Prüfung per E-Mail<br>
               <% } %>
-              <br><span style="color:var(--muted)">Lieferung:</span> <%= order.delivery_days || '3-6' %> Werktage nach Zahlungseingang
+              <span style="color:var(--muted)">Lieferung</span> <%= order.delivery_days || '3-6' %> Werktage nach Zahlungseingang
             </div>
           </div>
         </div>
 
-        <div style="margin-top:20px"><a class="btn btn-line" href="/konto/bestellungen">‹ Zurück zu meinen Bestellungen</a></div>
+        <div style="margin-top:18px"><a class="btn btn-line" href="/konto/bestellungen">‹ Zurück zu meinen Bestellungen</a></div>
       </div>
     </div>
   </div>

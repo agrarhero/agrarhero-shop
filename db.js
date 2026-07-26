@@ -157,6 +157,9 @@ ensureColumns('guest_visits', [
   ['user_id', 'INTEGER'],
 ]);
 
+// Bestehende Bestellungen auf die aktuelle Standard-Lieferzeit ziehen.
+try { db.prepare("UPDATE orders SET delivery_days='3-6' WHERE delivery_days='4-7'").run(); } catch (e) {}
+
 db.transaction = (fn) => (...args) => {
   db.exec('BEGIN');
   try { const r = fn(...args); db.exec('COMMIT'); return r; }
