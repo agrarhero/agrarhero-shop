@@ -143,7 +143,7 @@
           <form method="post" action="/admin/bestellung/<%= order.id %>/bezahlt"><button class="btn btn-block" style="background:var(--green);color:#fff">Als „Bezahlt" markieren</button></form>
         <% } else if (order.status === 'bezahlt') { %>
           <p style="color:var(--muted);font-size:.9rem;margin:0">Zahlung erhalten. Versand vorbereiten und Kunde informieren:</p>
-          <form method="post" action="/admin/bestellung/<%= order.id %>/versand"><button class="btn btn-block" style="background:#e5661f;color:#fff">„Versand" – Kunde benachrichtigen ▸</button></form>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/versand"><button class="btn btn-block" style="background:#4a9b2f;color:#fff">„Versand" – Kunde benachrichtigen ▸</button></form>
         <% } else if (order.status === 'versand') { %>
           <p style="color:var(--muted);font-size:.9rem;margin:0">In Versandvorbereitung. Jetzt versenden – oder Verzögerung melden:</p>
           <form method="post" action="/admin/bestellung/<%= order.id %>/versendet"><button class="btn btn-block" style="background:#c9a21a;color:#fff">„Versendet" – Versandbestätigung senden ▸</button></form>
@@ -221,7 +221,7 @@
     <p>Es wird eine <strong>PDF-Rechnung erzeugt</strong> und per E-Mail an den Kunden gesendet. Der Bestellstatus wechselt auf „Rechnung rausgeschickt“.</p>
     <div class="gb-acts">
       <button type="button" class="gb-cancel" onclick="gbClose('sendModal')">Abbrechen</button>
-      <button type="button" class="gb-ok" style="background:#e5661f;border-color:#e5661f" onclick="var f=document.getElementById('invForm'); f.action='/admin/bestellung/<%= order.id %>/rechnung'; f.submit();">Ja, Rechnung senden</button>
+      <button type="button" class="gb-ok" style="background:#4a9b2f;border-color:#4a9b2f" onclick="var f=document.getElementById('invForm'); f.action='/admin/bestellung/<%= order.id %>/rechnung'; f.submit();">Ja, Rechnung senden</button>
     </div>
   </div>
 </div>

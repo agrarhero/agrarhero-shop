@@ -312,9 +312,20 @@ router.get('/gaeste', requireAdmin, async (req, res) => {
     }
   }));
   const now = Date.now();
-  const guests = rows.map((g) => {
+
+  // Produkt-Namen für schöne Seiten-Labels (statt nur des Slugs).
+  const prodBySlug = {};
+  try { db.prepare('SELECT slug,name FROM products').all().forEach(p => { prodBySlug[p.slug] = p.name; }); } catch (e) {}
+  const labelFor = (url) => {
+    const path = (String(url || '/').split('?')[0]).replace(/\/+$/, '') || '/';
+    if (path.startsWith('/produkt/')) { const slug = path.slice('/produkt/'.length); return 'Produkt · ' + (prodBySlug[slug] || h.prettySlug(slug)); }
+    return h.pageLabel(url);
+  };
+
+  // 1) Rohsitzungen aufbereiten
+  const sessions = rows.map((g) => {
     let pages = []; try { pages = JSON.parse(g.pages || '[]'); } catch (e) {}
-    pages = pages.filter(x => x && x.p && !/^\/aktiv\b/.test(x.p));
+    pages = pages.filter(x => x && (x.u || x.p) && !/^\/aktiv\b/.test(x.u || x.p));
     let cartObj = {}; try { cartObj = JSON.parse(g.cart || '{}'); } catch (e) {}
     const cartItems = [];
     for (const k of Object.keys(cartObj)) {
@@ -328,21 +339,89 @@ router.get('/gaeste', requireAdmin, async (req, res) => {
       sid: g.sid, suspect: g.suspect ? 1 : 0,
       online: (now - g.last_seen) <= presence.GUEST_WINDOW_MS,
       first: g.first_seen, last: g.last_seen,
-      durationMin: Math.max(0, Math.round((g.last_seen - g.first_seen) / 60000)),
       ip: g.ip || '', ua: g.ua || '', dev: guestlog.parseUa(g.ua),
       flag: geo.flag(g.geo_cc), country: g.geo_country || '', region: g.geo_region || '', city: g.geo_city || '',
-      ref: g.ref || '', pageCount: pages.length,
-      pages: pages.slice(-40).reverse(),
+      ref: g.ref || '', pages,
+      registered_at: g.registered_at || null, user_id: g.user_id || null,
       cartItems, cartCount: cartItems.reduce((s, i) => s + i.qty, 0), cartGross: Math.round(cartNet * 1.19),
     };
   });
-  // Nur echte Besucher zeigen: Sitzungen ohne echten Seitenaufruf (z. B. reine /aktiv-Heartbeats
-  // oder cookielose Uptime-/Scanner-Bots) werden ausgeblendet.
-  const withPages = guests.filter(g => g.pages.length > 0);
-  const real = withPages.filter(g => !g.suspect && !guestlog.looksFake(g.ua));
+
+  const withPages = sessions.filter(s => s.pages.length > 0);
+  const real = withPages.filter(s => !s.suspect && !guestlog.looksFake(s.ua));
   const showAll = req.query.alle === '1';
   const shown = showAll ? withPages : real;
-  res.render('admin/guests', { title: 'Admin – Gäste', guests: shown, onlineNow: shown.filter(g => g.online).length, h, geo, showAll: showAll, hidden: withPages.length - real.length });
+
+  // 2) Nach IP gruppieren: eine IP = immer genau EIN Besucher, egal wie viele
+  //    Sitzungen/Signale (z. B. eines iPhones) mit derselben IP hereinkommen.
+  //    IP-Schreibweisen werden normalisiert (IPv6-Präfix, Groß/Klein, Leerzeichen),
+  //    damit dieselbe IP nicht durch Formatunterschiede getrennt angezeigt wird.
+  const normIp = (ip) => String(ip || '').trim().toLowerCase().replace(/^::ffff:/, '');
+  const groups = new Map();
+  for (const s of shown) {
+    const nip = normIp(s.ip);
+    const key = nip ? ('ip:' + nip) : ('sid:' + s.sid);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  }
+
+  const VISIT_GAP = 30 * 60 * 1000; // >30 Min. Pause = neuer Besuch
+  const ORD = ['Erstbesuch','Zweitbesuch','Drittbesuch','Viertbesuch','Fünftbesuch','Sechstbesuch','Siebtbesuch','Achtbesuch','Neuntbesuch','Zehntbesuch'];
+  const ordinal = (n) => ORD[n - 1] || (n + '. Besuch');
+  const dayLabel = (ms) => new Date(ms).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const visitors = [];
+  for (const [key, ss] of groups) {
+    ss.sort((a, b) => b.last - a.last);
+    const recent = ss[0];
+    // Alle Seitenaufrufe flach + chronologisch
+    const views = [];
+    for (const s of ss) for (const pg of s.pages) { const url = pg.u || pg.p; views.push({ t: pg.t, url, label: labelFor(url) }); }
+    views.sort((a, b) => a.t - b.t);
+    // In Besuche segmentieren
+    const visits = [];
+    let cur = null;
+    for (const v of views) {
+      if (!cur || (v.t - cur.end) > VISIT_GAP) { cur = { start: v.t, end: v.t, pages: [] }; visits.push(cur); }
+      cur.pages.push(v); cur.end = v.t;
+    }
+    visits.forEach((vi, i) => { vi.n = i + 1; vi.name = ordinal(i + 1); vi.day = dayLabel(vi.start); vi.durationSec = Math.round((vi.end - vi.start) / 1000); });
+    // Registrierung ("jetzt Kunde")
+    const regSess = ss.find(s => s.registered_at);
+    const registeredAt = regSess ? regSess.registered_at : null;
+    const userId = regSess ? regSess.user_id : null;
+    let userInfo = null;
+    if (userId) { try { const u = db.prepare('SELECT id, email, first_name, last_name, customer_number FROM users WHERE id=?').get(userId); if (u) userInfo = u; } catch (e) {} }
+    if (registeredAt) {
+      let target = null;
+      for (const vi of visits) if (vi.start <= registeredAt) target = vi;
+      if (!target && visits.length) target = visits[visits.length - 1];
+      if (target) target.registerEvent = registeredAt;
+    }
+    // Live aktuelle Seite (aktivste Online-Sitzung)
+    let live = null;
+    for (const s of ss) if (s.online) { const c = presence.sidCurrent(s.sid); if (c && c.path) { if (!live || c.at > live.at) live = { label: labelFor(c.path), url: c.path, since: c.since, at: c.at }; } }
+    const cartSess = ss.find(s => s.cartItems.length) || recent;
+    visitors.push({
+      ip: normIp(recent.ip) || recent.ip, flag: recent.flag, country: recent.country, region: recent.region, city: recent.city,
+      dev: recent.dev, ua: recent.ua,
+      online: ss.some(s => s.online),
+      first: Math.min.apply(null, ss.map(s => s.first)), last: Math.max.apply(null, ss.map(s => s.last)),
+      ref: ss.map(s => s.ref).find(Boolean) || '',
+      suspect: ss.some(s => s.suspect) ? 1 : 0,
+      sessionCount: ss.length, totalPages: views.length, visitCount: visits.length,
+      visits: visits.reverse(), // neueste zuerst
+      registeredAt, userInfo, live,
+      cartItems: cartSess.cartItems, cartCount: cartSess.cartCount, cartGross: cartSess.cartGross,
+    });
+  }
+  visitors.sort((a, b) => b.last - a.last);
+
+  res.render('admin/guests', {
+    title: 'Admin – Gäste', visitors, h, geo,
+    onlineNow: visitors.filter(v => v.online).length,
+    showAll, hidden: withPages.length - real.length,
+  });
 });
 
 // ---------- Kundenprofil ----------
@@ -358,7 +437,16 @@ router.get('/kunden/:id', requireAdmin, async (req, res) => {
   const riskLib0 = require('../lib/risk');
   const risk = riskLib0.assess(cust, orders, db, settingsLib.raw().fraud_watch_domains);
   const origin = riskLib0.originInfo(cust.landing_ref);
-  res.render('admin/customer', { title: 'Kunde ' + cust.email, cust, orders, stat: status, geo, cartInfo, risk, origin });
+  // Live: auf welcher Seite ist dieser Kunde gerade?
+  let live = null;
+  const lc = presence.userCurrent(cust.id);
+  if (lc && lc.path) {
+    const path = (lc.path.split('?')[0]).replace(/\/+$/, '') || '/';
+    let label = h.pageLabel(lc.path);
+    if (path.startsWith('/produkt/')) { const slug = path.slice('/produkt/'.length); const p = db.prepare('SELECT name FROM products WHERE slug=?').get(slug); if (p) label = 'Produkt · ' + p.name; }
+    live = { label, url: lc.path, since: lc.since };
+  }
+  res.render('admin/customer', { title: 'Kunde ' + cust.email, cust, orders, stat: status, geo, cartInfo, risk, origin, live });
 });
 
 // ---------- Kauf auf Rechnung pro Kunde freigeben/sperren ----------

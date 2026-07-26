@@ -16,7 +16,7 @@
   <% var cw=680, ch=200, n=months.length, gap=22, bw=(cw-gap*(n-1))/n; %>
   <svg viewBox="0 0 <%= cw %> <%= ch+40 %>" width="100%" style="max-width:720px;display:block">
     <% months.forEach(function(mo, i){ var bh=Math.round(mo.cents/maxCents*ch); var x=i*(bw+gap); var y=ch-bh; %>
-      <rect x="<%= x %>" y="<%= y %>" width="<%= bw %>" height="<%= bh %>" rx="6" fill="#e5661f" opacity="0.92"></rect>
+      <rect x="<%= x %>" y="<%= y %>" width="<%= bw %>" height="<%= bh %>" rx="6" fill="#4a9b2f" opacity="0.92"></rect>
       <text x="<%= x+bw/2 %>" y="<%= y-7 %>" text-anchor="middle" font-size="11" fill="#4a5566" font-family="Arial"><%= mo.cents ? (Math.round(mo.cents/100)).toLocaleString('de-DE')+' €' : '' %></text>
       <text x="<%= x+bw/2 %>" y="<%= ch+18 %>" text-anchor="middle" font-size="12" fill="#8a929c" font-family="Arial"><%= mo.label %></text>
     <% }) %>
@@ -132,7 +132,7 @@
   .gb-modal .gb-acts button{flex:1;padding:.85rem 1rem;border-radius:6px;font-weight:600;font-size:.98rem;cursor:pointer;font-family:'Inter',sans-serif}
   .gb-modal .gb-cancel{background:#fff;border:1px solid #d5d9df;color:#14171c}
   .gb-modal .gb-cancel:hover{border-color:#b6bcc5}
-  .gb-modal .gb-ok{background:#e5661f;border:1px solid #e5661f;color:#fff}
+  .gb-modal .gb-ok{background:#4a9b2f;border:1px solid #4a9b2f;color:#fff}
   .gb-modal .gb-ok:hover{background:#c9520f}
   body.gb-noscroll{overflow:hidden}
 </style>

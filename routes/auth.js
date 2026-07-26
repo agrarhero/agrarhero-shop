@@ -77,6 +77,8 @@ router.post('/registrieren', async (req, res) => {
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   try { db.prepare('UPDATE users SET customer_number = ? WHERE id = ?').run(require('../lib/ids').uniqueCustomerNumber(), user.id); } catch (e) {}
   try { db.prepare('UPDATE users SET landing_ref=?, reg_ip=? WHERE id=?').run(req.session.landingRef || '', (require('../lib/geo').clientIp(req) || ''), user.id); } catch (e) {}
+  // Im Gäste-Besuchsverlauf den Moment "jetzt Kunde geworden" festhalten.
+  try { require('../lib/guestlog').markRegistered(req.sessionId, user.id); } catch (e) {}
   if (shipDiff) {
     db.prepare('UPDATE users SET ship_first_name=?, ship_last_name=?, ship_company=?, ship_street=?, ship_zip=?, ship_city=?, ship_country=? WHERE id=?')
       .run(b.ship_first_name || '', b.ship_last_name || '', b.ship_company || '', b.ship_street || '', b.ship_zip || '', b.ship_city || '', b.ship_country || 'Deutschland', user.id);

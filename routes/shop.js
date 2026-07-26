@@ -234,7 +234,7 @@ router.post('/kasse', (req, res) => {
     b.note || '', totals.subtotal, taxRate, shipping,
     process.env.SELLER_NAME || '', process.env.SELLER_ADDRESS || '', process.env.SELLER_EMAIL || '', process.env.SELLER_PHONE || '',
     process.env.SELLER_IBAN || '', process.env.SELLER_BIC || '', process.env.SELLER_BANK || '', process.env.SELLER_USTID || '',
-    process.env.PAYMENT_DAYS || '14', process.env.DELIVERY_DAYS || '4-7');
+    process.env.PAYMENT_DAYS || '14', process.env.DELIVERY_DAYS || '3-6');
   const orderId = info.lastInsertRowid;
   const orderNo = ids.uniqueOrderNumber();
   db.prepare('UPDATE orders SET order_number = ? WHERE id = ?').run(orderNo, orderId);

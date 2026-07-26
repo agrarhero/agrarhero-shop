@@ -47,6 +47,12 @@
     </div>
     <div class="hkft-item">
       <div class="hkft-lbl">Aktivität</div>
+      <% if (typeof live !== 'undefined' && live) { %>
+        <div class="cust-live"><span class="cust-live-dot"></span> <span style="color:var(--muted)">Gerade auf:</span> <strong><%= live.label %></strong> <span style="color:var(--muted)">· seit <span class="live-sec" data-since="<%= live.since %>">0:00</span></span></div>
+        <div class="hkft-detail" style="font-family:monospace"><%= live.url %></div>
+      <% } else { %>
+        <div><span style="color:var(--muted)">Aktueller Status:</span> <strong>gerade nicht online</strong></div>
+      <% } %>
       <div><span style="color:var(--muted)">Zuletzt aktiv:</span> <strong><%= cust.last_seen ? h.dateTimeDE(cust.last_seen) : '—' %></strong></div>
       <div><span style="color:var(--muted)">Letzter Login:</span> <strong><%= cust.last_login ? h.dateTimeDE(cust.last_login) : '—' %></strong></div>
     </div>
@@ -202,5 +208,13 @@
   function gbOpenBan(){ document.getElementById('banModal').classList.add('open'); document.body.classList.add('gb-noscroll'); }
   function gbCloseBan(){ document.getElementById('banModal').classList.remove('open'); document.body.classList.remove('gb-noscroll'); }
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') gbCloseBan(); });
+</script>
+<style>
+  .cust-live{margin-bottom:2px}
+  .cust-live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#4a9b2f;margin-right:5px;vertical-align:middle}
+  .cust-live .live-sec{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+</style>
+<script>
+  (function(){ function t(){ var now=Date.now(); document.querySelectorAll('.live-sec').forEach(function(el){ var s0=parseInt(el.getAttribute('data-since'),10); if(!s0){el.textContent='—';return;} var s=Math.max(0,Math.floor((now-s0)/1000)); el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }); } t(); setInterval(t,1000); })();
 </script>
 <%- include('../partials/admin-footer') %>

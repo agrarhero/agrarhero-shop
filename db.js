@@ -153,6 +153,8 @@ ensureColumns('orders', [
 ]);
 ensureColumns('guest_visits', [
   ['suspect', 'INTEGER NOT NULL DEFAULT 0'],
+  ['registered_at', 'INTEGER'],
+  ['user_id', 'INTEGER'],
 ]);
 
 db.transaction = (fn) => (...args) => {

@@ -66,7 +66,7 @@ app.use((req, res, next) => {
   }
   // Live-Praesenz festhalten (In-Memory). Statische Dateien erreichen diese
   // Middleware nicht, daher zaehlt hier nur echte Seiten-/Route-Aktivitaet.
-  presence.touch(req.sessionId, req.user ? req.user.id : null, req.headers['user-agent']);
+  presence.touch(req.sessionId, req.user ? req.user.id : null, req.headers['user-agent'], req.originalUrl || req.path || '/');
   if (!req.user) guestlog.record(req);
   next();
 });

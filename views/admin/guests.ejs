@@ -1,13 +1,13 @@
 <%- include('../partials/admin-header') %>
 <div style="margin-bottom:16px">
   <div style="font-size:.85rem"><a href="/admin/kunden" style="color:var(--muted);text-decoration:none">← Zurück zu Kunden</a></div>
-  <h1 style="font-size:2rem;margin:.2rem 0">Gäste auf der Seite</h1>
-  <p style="color:var(--muted);font-size:.92rem">Nicht angemeldete Besucher der letzten 3&nbsp;Tage (Bots ausgeschlossen). Diese Liste wird automatisch nach 3&nbsp;Tagen gelöscht.</p>
+  <h1 style="font-size:2rem;margin:.2rem 0">Besucher-Radar</h1>
+  <p style="color:var(--muted);font-size:.92rem">Nicht angemeldete Besucher der letzten 3&nbsp;Tage – nach IP-Adresse zusammengeführt, mit vollständigem Besuchsverlauf, exakten Links sowie Datum und Uhrzeit auf die Sekunde. Bots ausgeschlossen, automatische Löschung nach 3&nbsp;Tagen.</p>
   <div style="margin-top:8px;font-size:.85rem">
-    <% if (typeof showAll !== 'undefined' && showAll) { %>
+    <% if (showAll) { %>
       <span style="color:var(--muted)">Alle Besucher inkl. mutmaßlicher Bots.</span> <a href="/admin/gaeste" style="color:var(--accent);font-weight:600;text-decoration:none">Nur echte Besucher anzeigen</a>
     <% } else { %>
-      <span style="color:var(--muted)">Nur echte Besucher.<% if (typeof hidden !== 'undefined' && hidden > 0) { %> <%= hidden %> mutmaßliche Bots ausgeblendet.<% } %></span> <a href="/admin/gaeste?alle=1" style="color:var(--accent);font-weight:600;text-decoration:none">Alle anzeigen (zur Kontrolle)</a>
+      <span style="color:var(--muted)">Nur echte Besucher.<% if (hidden > 0) { %> <%= hidden %> mutmaßliche Bots ausgeblendet.<% } %></span> <a href="/admin/gaeste?alle=1" style="color:var(--accent);font-weight:600;text-decoration:none">Alle anzeigen (zur Kontrolle)</a>
     <% } %>
   </div>
 </div>
@@ -21,96 +21,154 @@
     <span class="lc-eye" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
     </span>
-    <div><div class="lc-n"><%= guests.length %></div><div class="lc-l">Gäste (letzte 3 Tage)</div></div>
+    <div><div class="lc-n"><%= visitors.length %></div><div class="lc-l">Besucher (letzte 3 Tage)</div></div>
   </div>
   <div class="live-note">
-    <span class="pulse-live"></span> Diese Seite aktualisiert sich alle 20&nbsp;Sek.<br>
+    <span class="pulse-live"></span> Aktualisiert sich alle 20&nbsp;Sek.<br>
     „Online" = Aktivität in den letzten 10&nbsp;Minuten.
   </div>
 </div>
 
-<% if (!guests.length) { %>
-  <div class="panel" style="padding:26px;text-align:center;color:var(--muted)">Noch keine Gäste in den letzten 3&nbsp;Tagen.</div>
+<% if (!visitors.length) { %>
+  <div class="panel" style="padding:26px;text-align:center;color:var(--muted)">Noch keine Besucher in den letzten 3&nbsp;Tagen.</div>
 <% } %>
 
-<% guests.forEach(function(g){ %>
-  <div class="panel" style="padding:0;margin-bottom:14px;overflow:hidden">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <span class="pres <%= g.online ? 'is-on' : 'is-off' %>"><span class="pres-dot"></span><span class="pres-txt"><%= g.online ? 'Online' : 'Offline' %></span></span>
-        <strong style="font-size:1.02rem"><%= g.dev.browser %> · <%= g.dev.os %></strong>
-        <span style="font-size:.82rem;padding:2px 9px;border-radius:20px;background:<%= g.dev.mobile ? 'rgba(229,102,31,.14)' : 'rgba(35,42,51,.10)' %>;color:var(--muted)"><%= g.dev.device %></span>
-        <% if (g.suspect) { %><span style="font-size:.78rem;padding:2px 9px;border-radius:20px;background:rgba(211,58,44,.14);color:#c5362a;font-weight:600">mutmaßlicher Bot</span><% } %>
-      </div>
-      <div style="font-size:.85rem;color:var(--muted)">letzte Aktivität: <%= h.relTime(g.last) %></div>
-    </div>
+<% visitors.forEach(function(v){ %>
+  <div class="vcard<%= v.online ? ' is-live' : '' %>">
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 22px;padding:14px 16px">
-      <div>
-        <div class="gk">IP-Adresse</div>
-        <div class="gv"><%= g.ip || '—' %></div>
+    <div class="vc-head">
+      <div class="vc-id">
+        <span class="pres <%= v.online ? 'is-on' : 'is-off' %>"><span class="pres-dot"></span><span class="pres-txt"><%= v.online ? 'Live' : 'Offline' %></span></span>
+        <strong class="vc-dev"><%= v.dev.browser %> · <%= v.dev.os %></strong>
+        <span class="vchip"><%= v.dev.device %></span>
+        <% if (v.suspect) { %><span class="vchip vchip-warn">mutmaßlicher Bot</span><% } %>
+        <% if (v.registeredAt) { %><span class="vchip vchip-cust">Kunde geworden</span><% } %>
       </div>
-      <div>
-        <div class="gk">Herkunft (Standort)</div>
-        <div class="gv"><%= g.flag ? g.flag + ' ' : '' %><%= [g.city, g.region, g.country].filter(Boolean).join(', ') || 'unbekannt' %></div>
-      </div>
-      <div>
-        <div class="gk">Gekommen über</div>
-        <div class="gv"><%= g.ref ? g.ref : 'direkt / unbekannt' %></div>
-      </div>
-      <div>
-        <div class="gk">Erste Aktivität</div>
-        <div class="gv"><%= h.dateTimeDE(g.first) %></div>
-      </div>
-      <div>
-        <div class="gk">Sitzungsdauer</div>
-        <div class="gv"><%= g.durationMin %> Min. · <%= g.pageCount %> Seitenaufrufe</div>
-      </div>
-      <div>
-        <div class="gk">Gerät</div>
-        <div class="gv"><%= g.dev.mobile ? 'Mobil' : 'Desktop' %></div>
+      <div class="vc-visits">
+        <div><span class="vc-visits-n"><%= v.visitCount %>×</span> <span class="vc-visits-l">Besuch<%= v.visitCount === 1 ? '' : 'e' %></span></div>
+        <div class="vc-last">zuletzt <%= h.relTime(v.last) %></div>
       </div>
     </div>
 
-    <div style="padding:0 16px 12px">
-      <div class="gk" style="margin-bottom:6px">Angesehene Seiten (neueste zuerst)</div>
-      <% if (!g.pages.length) { %>
-        <div style="color:var(--muted);font-size:.88rem">—</div>
-      <% } else { %>
-        <div style="display:flex;flex-direction:column;gap:3px">
-          <% g.pages.forEach(function(p){ %>
-            <div style="display:flex;gap:10px;font-size:.86rem">
-              <span style="color:var(--muted);min-width:78px"><%= h.timeDE(p.t) %></span>
-              <span style="font-family:monospace"><%= p.p %></span>
-            </div>
-          <% }) %>
+    <% if (v.registeredAt) { %>
+      <div class="vconv">
+        <span class="vconv-star">★</span>
+        <div>Aus diesem Besucher wurde ein <strong>Kunde</strong> – registriert am <strong><%= h.dateTimeSecDE(v.registeredAt) %></strong><% if (v.userInfo) { %>, Konto <%= v.userInfo.customer_number || ('#' + v.userInfo.id) %><% } %>.</div>
+        <% if (v.userInfo) { %><a class="btn btn-line btn-sm" href="/admin/kunden/<%= v.userInfo.id %>">Kundenprofil öffnen ›</a><% } %>
+      </div>
+    <% } %>
+
+    <% if (v.online && v.live) { %>
+      <div class="vlive">
+        <span class="vlive-dot"></span>
+        <div>Gerade aktiv auf <strong><%= v.live.label %></strong> <span class="vlive-url"><%= v.live.url %></span></div>
+        <div class="vlive-sec">auf dieser Seite seit <span class="live-sec" data-since="<%= v.live.since %>">0:00</span></div>
+      </div>
+    <% } %>
+
+    <div class="vmeta">
+      <div><div class="vk">IP-Adresse</div><div class="vv mono"><%= v.ip || '—' %></div></div>
+      <div><div class="vk">Standort</div><div class="vv"><%= v.flag ? v.flag + ' ' : '' %><%= [v.city, v.region, v.country].filter(Boolean).join(', ') || 'unbekannt' %></div></div>
+      <div><div class="vk">Gekommen über</div><div class="vv"><%= v.ref ? v.ref : 'direkt / unbekannt' %></div></div>
+      <div><div class="vk">Erster Besuch</div><div class="vv"><%= h.dateTimeSecDE(v.first) %></div></div>
+      <div><div class="vk">Letzter Besuch</div><div class="vv"><%= h.dateTimeSecDE(v.last) %></div></div>
+      <div><div class="vk">Aufrufe gesamt</div><div class="vv"><%= v.totalPages %> Seiten in <%= v.visitCount %> Besuch<%= v.visitCount === 1 ? '' : 'en' %></div></div>
+    </div>
+
+    <div class="vtl">
+      <% v.visits.forEach(function(vt){ %>
+        <div class="visit">
+          <div class="visit-head">
+            <span class="visit-badge visit-b-<%= vt.n === 1 ? 'first' : 'more' %>"><%= vt.name %></span>
+            <span class="visit-meta"><%= vt.day %> · <%= h.timeSecDE(vt.start) %> bis <%= h.timeSecDE(vt.end) %> · <%= vt.pages.length %> Seite<%= vt.pages.length === 1 ? '' : 'n' %> · Dauer <%= Math.floor(vt.durationSec / 60) %>:<%= String(vt.durationSec % 60).padStart(2, '0') %> Min.</span>
+          </div>
+          <div class="pv-list">
+            <% vt.pages.forEach(function(p, idx){ %>
+              <div class="pv">
+                <span class="pv-step"><%= idx + 1 %></span>
+                <span class="pv-time"><%= h.timeSecDE(p.t) %></span>
+                <span class="pv-body"><span class="pv-label"><%= p.label %></span><span class="pv-url"><%= p.url %></span></span>
+              </div>
+            <% }) %>
+            <% if (vt.registerEvent) { %>
+              <div class="pv pv-ev">
+                <span class="pv-step">★</span>
+                <span class="pv-time"><%= h.timeSecDE(vt.registerEvent) %></span>
+                <span class="pv-body"><span class="pv-label">Hier zum Kunden geworden – Konto erstellt</span></span>
+              </div>
+            <% } %>
+          </div>
         </div>
-      <% } %>
+      <% }) %>
     </div>
 
-    <div style="padding:0 16px 14px">
-      <div class="gk" style="margin-bottom:6px">Warenkorb</div>
-      <% if (!g.cartItems.length) { %>
-        <div style="color:var(--muted);font-size:.88rem">leer</div>
-      <% } else { %>
-        <div style="display:flex;flex-direction:column;gap:3px">
-          <% g.cartItems.forEach(function(it){ %>
-            <div style="font-size:.9rem"><strong><%= it.qty %>×</strong> <%= it.name %> <span style="color:var(--muted)">(<%= h.euro(it.unit_cents) %>/Stk.)</span></div>
-          <% }) %>
-          <div style="font-size:.9rem;margin-top:2px"><strong>Warenkorb-Wert: <%= h.euro(g.cartGross) %></strong> (<%= g.cartCount %> Stk., inkl. MwSt.)</div>
-        </div>
-      <% } %>
-    </div>
+    <% if (v.cartItems.length) { %>
+      <div class="vcart">
+        <div class="vk" style="margin-bottom:6px">Warenkorb</div>
+        <% v.cartItems.forEach(function(it){ %>
+          <div class="vcart-line"><strong><%= it.qty %>×</strong> <%= it.name %> <span style="color:var(--muted)">(<%= h.euro(it.unit_cents) %>/Stk.)</span></div>
+        <% }) %>
+        <div class="vcart-sum">Warenkorb-Wert <strong><%= h.euro(v.cartGross) %></strong> · <%= v.cartCount %> Stk., inkl. MwSt.</div>
+      </div>
+    <% } %>
 
-    <div style="padding:8px 16px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);word-break:break-all">
-      User-Agent: <%= g.ua || '—' %>
-    </div>
+    <div class="vfoot">User-Agent: <%= v.ua || '—' %></div>
   </div>
 <% }) %>
 
 <style>
-  .gk{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
-  .gv{font-size:.95rem;font-weight:600}
+  .vcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 10px 30px -24px rgba(20,40,20,.5)}
+  .vcard.is-live{border-color:rgba(74,155,47,.55);box-shadow:0 12px 34px -22px rgba(47,93,52,.55)}
+  .vc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:linear-gradient(180deg,#f6f8f0,#fff)}
+  .vc-id{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .vc-dev{font-size:1.02rem}
+  .vchip{font-size:.76rem;padding:3px 10px;border-radius:20px;background:rgba(35,42,51,.08);color:var(--muted);font-weight:600}
+  .vchip-warn{background:rgba(192,57,43,.14);color:#c0392b}
+  .vchip-cust{background:rgba(74,155,47,.16);color:#2f7d1f}
+  .vc-visits{text-align:right;line-height:1.25}
+  .vc-visits-n{font-family:'Poppins';font-weight:700;font-size:1.15rem;color:var(--accent)}
+  .vc-visits-l{font-size:.8rem;color:var(--muted)}
+  .vc-last{font-size:.8rem;color:var(--muted)}
+  .vconv{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;background:linear-gradient(90deg,rgba(74,155,47,.15),rgba(74,155,47,.03));border-bottom:1px solid var(--line);font-size:.92rem}
+  .vconv-star{color:#e0a800;font-size:1.2rem}
+  .vconv .btn{margin-left:auto}
+  .vlive{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 18px;background:rgba(74,155,47,.07);border-bottom:1px solid var(--line);font-size:.92rem}
+  .vlive-dot{width:10px;height:10px;flex:0 0 auto;border-radius:50%;background:#4a9b2f;animation:vlivePulse 1.4s infinite}
+  @keyframes vlivePulse{0%{box-shadow:0 0 0 0 rgba(74,155,47,.55)}70%{box-shadow:0 0 0 9px rgba(74,155,47,0)}100%{box-shadow:0 0 0 0 rgba(74,155,47,0)}}
+  .vlive-url{font-family:monospace;font-size:.82rem;color:var(--muted);margin-left:6px;word-break:break-all}
+  .vlive-sec{margin-left:auto;font-size:.85rem;color:var(--muted);white-space:nowrap}
+  .vlive-sec .live-sec{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .vmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 20px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .vk{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:2px}
+  .vv{font-size:.92rem;font-weight:600}
+  .vv.mono{font-family:monospace}
+  .vtl{padding:8px 18px 6px}
+  .visit{border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
+  .visit-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+  .visit-badge{font-size:.74rem;font-weight:800;letter-spacing:.03em;padding:3px 11px;border-radius:20px}
+  .visit-b-first{background:linear-gradient(135deg,#4a9b2f,#2f5d34);color:#fff}
+  .visit-b-more{background:rgba(74,155,47,.14);color:#2f7d1f}
+  .visit-meta{font-size:.82rem;color:var(--muted)}
+  .pv-list{padding:6px 4px}
+  .pv{display:flex;align-items:flex-start;gap:12px;padding:7px 10px;border-radius:8px}
+  .pv:hover{background:var(--paper-2)}
+  .pv-step{width:22px;height:22px;flex:0 0 auto;border-radius:50%;background:#eef2e6;color:var(--muted);font-size:.72rem;font-weight:700;display:grid;place-items:center;margin-top:1px}
+  .pv-time{flex:0 0 auto;font-size:.82rem;color:var(--muted);min-width:104px;font-variant-numeric:tabular-nums;margin-top:2px}
+  .pv-body{display:flex;flex-direction:column;min-width:0}
+  .pv-label{font-weight:600;font-size:.92rem}
+  .pv-url{font-family:monospace;font-size:.78rem;color:var(--muted);word-break:break-all}
+  .pv-ev{background:rgba(74,155,47,.10)}
+  .pv-ev .pv-step{background:#e0a800;color:#fff}
+  .pv-ev .pv-label{color:#2f7d1f}
+  .vcart{padding:12px 18px;border-top:1px solid var(--line)}
+  .vcart-line{font-size:.9rem}
+  .vcart-sum{font-size:.9rem;margin-top:4px}
+  .vfoot{padding:8px 18px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);word-break:break-all}
+  @media(max-width:560px){ .pv-time{min-width:0} .pv{gap:8px} .vc-visits{text-align:left} }
 </style>
-<script>setTimeout(function(){ location.reload(); }, 20000);</script>
+<script>
+  function tickLive(){ var now=Date.now(); document.querySelectorAll('.live-sec').forEach(function(el){ var since=parseInt(el.getAttribute('data-since'),10); if(!since){el.textContent='—';return;} var s=Math.max(0,Math.floor((now-since)/1000)); var m=Math.floor(s/60); el.textContent=m+':'+String(s%60).padStart(2,'0'); }); }
+  tickLive(); setInterval(tickLive,1000);
+  setTimeout(function(){ location.reload(); }, 20000);
+</script>
 <%- include('../partials/admin-footer') %>
