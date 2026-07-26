@@ -1,0 +1,43 @@
+<%- include('partials/header') %>
+
+<div class="page-head"><div class="wrap"><div class="crumb"><a href="/">Start</a> › Kontakt</div><h1>Kontakt & Angebotsanfrage</h1></div></div>
+
+<section class="block">
+  <div class="wrap">
+    <div class="auth-split">
+      <div class="form-card">
+        <div class="section-title" style="margin-top:0">Schreiben Sie uns</div>
+        <% if (typeof flash !== 'undefined' && flash && flash.type === 'success') { %>
+          <div class="flash success" style="margin:0 0 14px"><%= flash.msg %></div>
+        <% } else if (typeof flash !== 'undefined' && flash && flash.type === 'error') { %>
+          <div class="flash error" style="margin:0 0 14px"><%= flash.msg %></div>
+        <% } %>
+        <form method="post" action="/kontakt">
+          <div class="field"><label>Name</label><input name="name" required placeholder="Ihr Name"></div>
+          <div class="field"><label>E-Mail</label><input type="email" name="email" required placeholder="ihre@email.de"></div>
+          <div class="field"><label>Nachricht</label><textarea name="message" rows="5" required placeholder="Ihre Anfrage, z. B. Menge und gewünschtes Modell"></textarea></div>
+          <button class="btn btn-accent btn-block" type="submit">Anfrage senden</button>
+        </form>
+        <p class="form-note" style="margin-top:10px">Wir behandeln Ihre Angaben vertraulich und geben sie nicht an Dritte weiter.</p>
+      </div>
+      <div class="form-card" style="background:var(--paper-2)">
+        <div class="section-title" style="margin-top:0">So erreichen Sie uns</div>
+        <p style="line-height:1.75;color:var(--muted);margin-bottom:14px">
+          Kontaktieren Sie uns gern bei <strong style="color:var(--ink)">größeren Mengen</strong>, individuellen
+          <strong style="color:var(--ink)">Angebotsanfragen</strong>, <strong style="color:var(--ink)">Job- und Bewerbungsanfragen</strong>
+          oder jedem anderen Anliegen.
+        </p>
+        <p style="line-height:1.75;color:var(--muted);margin-bottom:18px">
+          Wir antworten sehr zügig – <strong style="color:var(--ink)">werktags meist innerhalb von 1–4 Stunden</strong>.
+        </p>
+        <div style="border-top:1px solid var(--line);padding-top:16px;line-height:2;color:var(--muted)">
+          <strong style="color:var(--ink)">E-Mail:</strong> <%= (typeof seller !== 'undefined' && seller.email) ? seller.email : 'info@agrarhero.de' %><br>
+          <strong style="color:var(--ink)">Telefon:</strong> <%= (typeof seller !== 'undefined' && seller.phone) ? seller.phone : '+49 89 45210988' %>
+          <p style="margin:6px 0 0;font-size:.88rem;font-style:italic;line-height:1.55">Unser Telefonanschluss ist derzeit vom Anbieter im Zuge einer technischen Umstellung (Migration auf IP-Telefonie) vorübergehend deaktiviert und nicht erreichbar. In dieser Zeit sind wir zuverlässig und schnell per E-Mail für Sie da &ndash; in der Regel antworten wir innerhalb weniger Stunden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

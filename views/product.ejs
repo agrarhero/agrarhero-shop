@@ -1,0 +1,309 @@
+<%- include('partials/header') %>
+<%
+  var _base = (typeof baseUrl!=='undefined'?baseUrl:'');
+  var _gross = (Math.round((p.price_cents||0)*1.19)/100).toFixed(2);
+  var _img = p.image ? (_base + '/img/products/' + p.image) : (_base + '/og-image.jpg');
+  var _cond = (false) ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition';
+  var _ld = {"@context":"https://schema.org","@type":"Product","name":p.name,"image":[_img],
+    "description":(p.short_desc||p.description||p.name),"sku":p.slug,
+    "brand":{"@type":"Brand","name":"Agrarhero"},
+    "offers":{"@type":"Offer","priceCurrency":"EUR","price":_gross,"itemCondition":_cond,
+      "availability":"https://schema.org/InStock","url":_base+'/produkt/'+p.slug,
+      "seller":{"@type":"Organization","name":(typeof seller!=='undefined'?seller.name:'')}}};
+  if (p.ratingCount && p.ratingCount > 0) { _ld.aggregateRating = {"@type":"AggregateRating","ratingValue":String(p.ratingAvg),"reviewCount":String(p.ratingCount)}; }
+%>
+<script type="application/ld+json"><%- JSON.stringify(_ld).replace(/</g,'\\u003c') %></script>
+<% var _cstock = (p.stock != null) ? Number(p.stock) : null;
+   var _gstock = (true && p.stock != null) ? Number(p.stock) : null;
+   var _wv = (typeof user !== 'undefined' && user && user.min_order_waived) ? true : false;
+   var _effMin = _wv ? 1 : (p.min_order || 1);
+   var _psold = p.sold_out || (_cstock != null && _cstock <= 0);
+   var _cmax = _cstock != null ? Math.max(1, Math.min(p.max_order || 200, _cstock)) : (p.max_order || 200);
+   var _cral = '';
+   var _war = (p.featureList||[]).find(function(f){ return /garantie/i.test(f); });
+   var _hl = [];
+   if (p.load_capacity) _hl.push(p.load_capacity);
+   (p.type||'').split('·').forEach(function(t){ t=(t||'').trim(); if(t) _hl.push(t.charAt(0).toUpperCase()+t.slice(1)); });
+   var _dimLabel = p.product_group==='seilwinde' ? 'Schild &amp; Anbau' : (p.product_group==='guellefass' ? 'Fahrwerk' : (p.product_group==='saege' ? 'Gewicht' : 'Maße'));
+   var _loadLabel = p.product_group==='seilwinde' ? 'Zugkraft' : (p.product_group==='guellefass' ? 'Fassungsvermögen' : (p.product_group==='saege' ? 'Leistung' : (p.product_group==='erntebox' ? 'Fassungsvermögen' : 'Tragkraft')));
+   var _isBox = (p.product_group === 'erntebox');
+   var _almostSold = (_cstock != null && _cstock > 0 && _isBox && _cstock <= 150);
+   var _lowStock = (_cstock != null && _cstock > 0 && !_almostSold && _cstock <= (_isBox ? 300 : 8));
+   var _variants = h.safeParse(p.variants, []); var _hasVar = _variants.length > 0;
+   var _startCents = _hasVar ? _variants[0].price_cents : p.price_cents;
+   var _addon = h.safeParse(p.addon, null);
+   var _artNr = h.artNr(p.slug); %>
+<div class="page-head">
+  <div class="wrap">
+    <div class="crumb"><a href="/">Start</a> › <a href="/produkte?gruppe=<%= p.product_group %>"><%= h.groupLabel(p.product_group) %></a> › <%= p.type %></div>
+  </div>
+</div>
+
+<section class="block">
+  <div class="wrap">
+    <div class="pd">
+      <% var gal = h.safeParse(p.gallery, []); var allImgs = (p.image ? [p.image] : []).concat(gal); %>
+      <div class="gallery-wrap">
+        <div class="gallery<%= p.sold_out ? ' is-sold' : '' %>">
+          <% if (allImgs.length) { %><img class="gallery-img" id="mainImg" src="/img/products/<%= allImgs[0] %>" alt="<%= p.name %>"><% } else { %><div class="mini"></div><% } %>
+          <% if (p.sold_out) { %><span class="save save-sold gallery-badge">AUSVERKAUFT</span><% } else { %><span class="save save-new gallery-badge">NEU</span><% } %>
+        </div>
+        <% if (allImgs.length > 1) { %>
+          <div class="gallery-thumbs">
+            <% allImgs.forEach(function(im, i){ %>
+              <button type="button" class="gthumb<%= i===0 ? ' active':'' %>" onclick="gbSwap(this,'<%= im %>')"><img src="/img/products/<%= im %>" alt=""></button>
+            <% }) %>
+          </div>
+        <% } %>
+        <div style="margin-top:22px"><%- include('partials/spende') %></div>
+      </div>
+      <div class="pd-buy">
+        <div class="type"><%= p.type %></div>
+        <h1><%= p.name %></h1>
+        <div class="art-nr">Art.-Nr. <span><%= _artNr %></span></div>
+        <a href="#bewertungen" class="rating-summary">
+          <% if (p.ratingCount) { %>
+            <span class="starbar lg" style="--p:<%= Math.round((p.ratingAvg/5)*100) %>%"></span>
+            <span class="rs-val"><%= p.ratingAvg.toFixed(1).replace('.', ',') %></span>
+            <span class="rs-cnt">von 5 · <%= p.ratingCount %> Bewertungen</span>
+          <% } else { %>
+            <span class="rs-cnt" style="font-style:italic">Noch keine Bewertungen</span>
+          <% } %>
+        </a>
+        <p class="lead"><%= p.short_desc %></p>
+
+        <% if (_hl.length || _war || p.baujahr) { %>
+          <div class="hl-chips">
+            <% if (p.baujahr) { %>
+              <span class="hchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Baujahr <%= p.baujahr %></span>
+            <% } %>
+            <% _hl.slice(0,4).forEach(function(h){ %>
+              <span class="hchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg><%= h %></span>
+            <% }) %>
+            <% if (_war) { %>
+              <span class="hchip is-warranty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><%= _war %></span>
+            <% } %>
+          </div>
+        <% } %>
+
+        <div class="buybox">
+          <div class="pricebox">
+            <% if (_hasVar) { %><span class="ab">ab</span><% } %>
+            <span class="now" id="prodPrice"><%= h.euro(_startCents) %></span>
+            <span class="gross-note">(Brutto <span id="prodGross"><%= h.euro(Math.round(_startCents*1.19)) %></span>)</span>
+            <% if (p.compare_cents){ %><span class="was"><%= h.euro(p.compare_cents) %></span><% } %>
+            <% if (p.sold_out) { %><span class="save save-sold">AUSVERKAUFT</span><% } %>
+          </div>
+          <span class="net">Preis pro Stück, zzgl. 19 % MwSt.<% if (true) { %> · Neuware, günstiger als der Wettbewerb<% } %></span>
+
+          <% if (false) { %><div class="cond-badge">✓ Geprüfte Gebrauchtware · gereinigt & funktionsgetestet · Top-Zustand</div><% } %>
+          <% if (settings.promo_active && true) { %><div class="ship-badge">✓ Kostenloser Versand innerhalb Deutschlands <span class="ship-aktion">· Aktion bis <%= settings.promo_end_date %></span></div><% } %>
+
+          <% if (_war) { %>
+          <div class="guarantee">
+            <svg class="seal" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M24 4l15 6v10c0 9.4-6.4 16.3-15 19-8.6-2.7-15-9.6-15-19V10z"/>
+              <path d="M17 24l5 5 9-9"/>
+            </svg>
+            <div class="g-txt"><b><%= _war %></b><span>Volle Herstellergarantie ab Kaufdatum</span></div>
+          </div>
+          <% } %>
+
+          <% if (_psold) { %><div class="stock-badge stock-crit"><span class="stock-dot"></span>Derzeit ausverkauft</div>
+          <% } else if (_almostSold) { %><div class="stock-badge stock-crit"><span class="stock-dot"></span>So gut wie ausverkauft</div>
+          <% } else if (_lowStock) { %><div class="stock-badge stock-low"><span class="stock-dot"></span>Nur noch wenige verfügbar</div>
+          <% } else { %><div class="stock-badge stock-ok"><span class="stock-dot"></span>Auf Lager · sofort lieferbar</div><% } %>
+
+          <% if (_psold) { %>
+            <div class="sold-note">
+              <strong>Dieser Artikel ist derzeit ausverkauft.</strong>
+              <span>Er kann aktuell nicht bestellt werden. Wir bemühen uns, den Bestand zeitnah wieder aufzufüllen. Bei Bedarf beraten wir Sie gern zu einer verfügbaren Alternative – <a href="/kontakt">kontaktieren Sie uns einfach</a>.</span>
+            </div>
+            <div class="qty-add">
+              <div class="qty is-disabled">
+                <button type="button" disabled>−</button>
+                <input type="number" value="0" disabled>
+                <button type="button" disabled>+</button>
+              </div>
+              <button class="btn btn-sold" type="button" disabled style="flex:1">Ausverkauft</button>
+            </div>
+          <% } else { %>
+            <form method="post" action="/warenkorb/hinzufuegen" id="addForm">
+              <input type="hidden" name="product_id" value="<%= p.id %>">
+              <input type="hidden" name="redirect" value="cart">
+              <% var copts = h.safeParse(p.color_options, []); %>
+              <% if (copts.length) { %>
+                <div class="colorpick">
+                  <span class="cp-label">Farbe wählen *</span>
+                  <div class="cp-swatches">
+                    <% copts.forEach(function(c){ var k=c.toLowerCase();
+                       var hex = k.indexOf('blau')>-1?'#1f5fae':(k.indexOf('gr')>-1?'#3a7d3a':(k.indexOf('rot')>-1?'#b52a2a':(k.indexOf('schwarz')>-1?'#232323':'#8a929c'))); %>
+                      <label class="cp-swatch">
+                        <input type="radio" name="color" value="<%= c %>" required>
+                        <span class="cp-dot" style="background:<%= hex %>"></span>
+                        <span class="cp-name"><%= c %></span>
+                      </label>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+              <% if (_hasVar) { %>
+                <div class="varpick">
+                  <span class="vp-label">Ausführung &amp; Länge wählen *</span>
+                  <div class="vp-list">
+                    <% _variants.forEach(function(v, i){ %>
+                      <label class="vp-opt<%= i===0 ? ' is-sel' : '' %>">
+                        <input type="radio" name="variant" value="<%= v.label %>" data-cents="<%= v.price_cents %>" <%= i===0 ? 'checked' : '' %> required>
+                        <span class="vp-main"><span class="vp-radio"></span><%= v.label %></span>
+                        <span class="vp-price"><%= h.euro(v.price_cents) %></span>
+                      </label>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+              <% if (_addon) { %>
+                <div class="addon-wrap">
+                  <div class="addon-head"><span class="addon-num">+</span> Empfohlenes Zubehör</div>
+                  <label class="addon-pick">
+                    <input type="checkbox" name="addon" value="1">
+                    <span class="ap-check"></span>
+                    <% if (_addon.image) { %><img src="/img/products/<%= _addon.image %>" alt=""><% } %>
+                    <span class="ap-txt"><b><%= _addon.label %></b><span>Passendes Zubehör, direkt mitbestellen</span></span>
+                    <span class="ap-price">+ <%= h.euro(_addon.price_cents) %></span>
+                  </label>
+                </div>
+              <% } %>
+              <div class="qty-add">
+                <div class="qty">
+                  <button type="button" class="qbtn" data-dir="-1" aria-label="weniger">−</button>
+                  <input type="number" name="quantity" value="<%= _effMin %>" min="<%= _effMin %>" data-max="<%= _cmax %>" id="qtyInput" inputmode="numeric">
+                  <button type="button" class="qbtn" data-dir="1" aria-label="mehr">+</button>
+                </div>
+                <button class="btn btn-accent" type="submit" style="flex:1">In den Warenkorb legen</button>
+              </div>
+              <p class="qty-hint" id="qtyHint">Für größere Mengen <a href="/kontakt">kontaktieren Sie uns</a> – gern mit individuellem Angebot.</p>
+            </form>
+          <% } %>
+
+          <ul class="bb-facts">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>Verfügbarkeit: <b><%= _psold ? 'Derzeit ausverkauft' : (_almostSold ? 'So gut wie ausverkauft' : (_lowStock ? 'Nur noch wenige Stück' : 'Sofort ab Lager')) %></b></li>
+            <% if (!_wv && (p.min_order||1) > 1) { %><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Mindestbestellmenge: <b><%= p.min_order %> Stück</b></li><% } %>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18.5" r="1.6"/><circle cx="17.5" cy="18.5" r="1.6"/></svg>Lieferung: <% if (false) { %><b>7–10 Werktage</b> nach Zahlungseingang<% } else { %><b>3–6 Werktage</b> nach Zahlungseingang<% } %></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Zahlung: <b>Kauf auf Rechnung / Vorkasse</b></li>
+          </ul>
+        </div>
+
+        <% if (p.safety_note) { %>
+        <div class="safety-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div><b>Sicherheitshinweis</b><span><%= p.safety_note %></span></div>
+        </div>
+        <% } %>
+
+        <% if (p.manual_pdf) { %>
+        <a class="doc-link" href="<%= p.manual_pdf %>" target="_blank" rel="noopener">
+          <span class="dl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></span>
+          <span class="dl-txt"><b>Bedienungsanleitung (PDF)</b><span>Öffnet im Browser · auch am Handy</span></span>
+          <svg class="dl-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+        <% } %>
+
+        <div class="usp-row">
+          <div class="usp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 19.3 7.2 16.7l.9-5.4L4.2 7.7l5.4-.8z"/></svg>
+            <b>Fabrikneu</b><span>Originalverpackt vom Fachhändler</span>
+          </div>
+          <div class="usp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18.5" r="1.6"/><circle cx="17.5" cy="18.5" r="1.6"/></svg>
+            <b>Deutschlandweit</b><span>Lieferung per Spedition</span>
+          </div>
+          <div class="usp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+            <b>Kauf auf Rechnung</b><span>Für Bestandskunden</span>
+          </div>
+          <div class="usp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <b>Persönliche Beratung</b><span>Ehrlich, vor und nach dem Kauf</span>
+          </div>
+        </div>
+
+        <p class="maxnote"><% if (_cstock != null) { %>Größere Stückzahl gewünscht? <a href="/kontakt">Kontaktieren Sie uns</a> – wir beschaffen gern kurzfristig nach.<% } else { %>Größere Mengen als <%= p.max_order || 200 %> Stück? <a href="/kontakt">Kontaktieren Sie uns</a> für ein individuelles Angebot.<% } %></p>
+      </div>
+    </div>
+
+    <div class="pd-details">
+      <div class="section-title">Produktdetails</div>
+      <% if (p.description){ %><p class="pdd-desc"><%= p.description %></p><% } %>
+      <div class="pdd-card">
+        <div class="spec-hi">
+          <div class="shi"><span>Artikelnummer</span><strong><%= _artNr %></strong></div>
+          <% if (p.dimensions){ %><div class="shi"><span><%- _dimLabel %></span><strong><%= p.dimensions %></strong></div><% } %>
+          <% if (p.load_capacity){ %><div class="shi"><span><%- _loadLabel %></span><strong><%= p.load_capacity %></strong></div><% } %>
+          <% if (p.baujahr){ %><div class="shi"><span>Baujahr</span><strong><%= p.baujahr %></strong></div><% } %>
+          <div class="shi"><span>Ausführung</span><strong><%= false ? 'Gebraucht · geprüfter Top-Zustand' : 'Neuware · fabrikneu' %></strong></div>
+          <% if (_cral) { %><div class="shi"><span>Farbe</span><strong><%= _cral %></strong></div><% } %>
+        </div>
+        <% if ((p.featureList||[]).length) { %>
+          <div class="pdd-sub">Ausstattung &amp; technische Merkmale</div>
+          <ul class="feat feat-2col">
+            <% (p.featureList||[]).forEach(function(f){ %><li><%= f %></li><% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="narrow" id="bewertungen" style="margin:40px auto 0">
+      <div class="section-title">Bewertungen</div>
+      <div class="rating-summary big">
+        <% if (p.ratingCount) { %>
+          <span class="starbar lg" style="--p:<%= Math.round((p.ratingAvg/5)*100) %>%"></span>
+          <span class="rs-val"><%= p.ratingAvg.toFixed(1).replace('.', ',') %></span>
+          <span class="rs-cnt">von 5 · <%= p.ratingCount %> Bewertungen</span>
+        <% } else { %>
+          <span class="rs-cnt" style="font-style:italic">Noch keine Bewertungen – seien Sie der Erste.</span>
+        <% } %>
+      </div>
+
+      <% if (typeof canReview !== 'undefined' && canReview && !hasReviewed) { %>
+        <form method="post" action="/produkt/<%= p.slug %>/bewerten" class="reviewbox" data-validate>
+          <h4>Dieses Produkt bewerten</h4>
+          <p>Sie haben diesen Artikel gekauft und erhalten – wie zufrieden sind Sie?</p>
+          <div class="star-pick">
+            <input type="radio" name="rating" id="s5" value="5" required><label for="s5" title="5 Sterne">★</label>
+            <input type="radio" name="rating" id="s4" value="4"><label for="s4" title="4 Sterne">★</label>
+            <input type="radio" name="rating" id="s3" value="3"><label for="s3" title="3 Sterne">★</label>
+            <input type="radio" name="rating" id="s2" value="2"><label for="s2" title="2 Sterne">★</label>
+            <input type="radio" name="rating" id="s1" value="1"><label for="s1" title="1 Stern">★</label>
+          </div>
+          <div><button class="btn btn-accent btn-sm" type="submit" style="margin-top:14px">Bewertung abgeben</button></div>
+        </form>
+      <% } else if (typeof hasReviewed !== 'undefined' && hasReviewed) { %>
+        <div class="reviewbox"><div class="note">Sie haben dieses Produkt bereits bewertet – vielen Dank für Ihr Feedback!</div></div>
+      <% } else if (user) { %>
+        <div class="reviewbox"><div class="note">Bewertungen sind nur möglich, wenn Sie diesen Artikel gekauft und erhalten haben.</div></div>
+      <% } else { %>
+        <div class="reviewbox"><div class="note"><a href="/login">Melden Sie sich an</a>, um zu bewerten. Bewertungen sind nur nach Kauf und Erhalt des Artikels möglich.</div></div>
+      <% } %>
+    </div>
+  </div>
+</section>
+<script>
+function gbSwap(btn, name){
+  var main=document.getElementById('mainImg'); if(main) main.src='/img/products/'+name;
+  document.querySelectorAll('.gallery-thumbs .gthumb').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+(function(){
+  var radios=document.querySelectorAll('input[name="variant"]'); if(!radios.length) return;
+  var out=document.getElementById('prodPrice');
+  var gout=document.getElementById('prodGross');
+  function fmt(c){ return (c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+  function upd(){
+    document.querySelectorAll('.vp-opt').forEach(function(o){ o.classList.remove('is-sel'); });
+    radios.forEach(function(r){ if(r.checked){ var c=+r.dataset.cents; if(out) out.textContent=fmt(c); if(gout) gout.textContent=fmt(Math.round(c*1.19)); var l=r.closest('.vp-opt'); if(l) l.classList.add('is-sel'); } });
+  }
+  radios.forEach(function(r){ r.addEventListener('change', upd); });
+  upd();
+})();
+</script>
+<%- include('partials/footer') %>

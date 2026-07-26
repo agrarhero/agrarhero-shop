@@ -1,0 +1,130 @@
+<%- include('../partials/admin-header') %>
+<% var featLines = (h.safeParse(p.features, []) || []).join('\n');
+   var euro = function(c){ return c==null ? '' : (c/100).toFixed(2).replace('.', ','); }; %>
+
+<div style="margin-bottom:8px"><a href="/admin/produkte" style="color:var(--muted);font-size:.88rem">‹ Zurück zur Produktliste</a></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 style="font-size:1.9rem"><%= mode === 'create' ? 'Neues Produkt' : 'Produkt bearbeiten' %></h1>
+    <% if (mode === 'edit') { %><p style="color:var(--muted);font-size:.9rem">Slug: <code><%= p.slug %></code> · ID <%= p.id %> · <a href="/produkt/<%= p.slug %>" target="_blank">im Shop ansehen ↗</a></p><% } %>
+  </div>
+</div>
+
+<form method="post" action="<%= mode === 'create' ? '/admin/produkte/neu' : '/admin/produkte/' + p.id %>" enctype="multipart/form-data">
+  <div class="pe-grid">
+    <div class="pe-main">
+      <div class="panel pe-card">
+        <h3>Basis</h3>
+        <label class="fld"><span>Produktname *</span><input name="name" value="<%= p.name %>" required></label>
+        <% if (mode === 'create') { %><label class="fld"><span>Slug (optional, wird sonst automatisch erzeugt)</span><input name="slug" value="" placeholder="z. B. vakuum-guellefass-3000"></label><% } %>
+        <label class="fld"><span>Kurz-Typ (klein über dem Namen, z. B. „Vakuumfass · verzinkt")</span><input name="type" value="<%= p.type %>"></label>
+        <label class="fld"><span>Kurzbeschreibung (1 Satz)</span><input name="short_desc" value="<%= p.short_desc %>"></label>
+        <label class="fld"><span>Beschreibung (Fließtext)</span><textarea name="description" rows="5"><%= p.description %></textarea></label>
+        <label class="fld"><span>Merkmale (eine Zeile = ein Punkt)</span><textarea name="features" rows="5"><%= featLines %></textarea></label>
+      </div>
+
+      <div class="panel pe-card">
+        <h3>Technische Daten</h3>
+        <label class="fld"><span>Außenmaße</span><input name="dimensions" value="<%= p.dimensions %>" placeholder="1.240 × 835 × 970 mm"></label>
+        <label class="fld"><span>Tragkraft / Nutzlast</span><input name="load_capacity" value="<%= p.load_capacity %>" placeholder="Nutzlast 1.500 kg · Auflast 6.000 kg"></label>
+      </div>
+    </div>
+
+    <div class="pe-side">
+      <div class="panel pe-card">
+        <h3>Bilder</h3>
+        <% var allImgs = (p.image ? [p.image] : []).concat(h.safeParse(p.gallery, [])); %>
+        <% if (allImgs.length) { %>
+          <p class="hint" style="margin-bottom:10px">Ziehen Sie die Bilder in die gewünschte Reihenfolge. Das <b>erste Bild ist automatisch das Titelbild</b>.</p>
+          <div class="pe-imgsort" id="imgSort">
+            <% allImgs.forEach(function(im, i){ %>
+              <div class="pe-imgcard<%= i===0 ? ' is-title' : '' %>" draggable="true" data-img="<%= im %>">
+                <span class="drag" title="Zum Sortieren ziehen">⠿</span>
+                <img src="/img/products/<%= im %>" alt="">
+                <span class="tb-badge">Titelbild</span>
+                <label class="rm"><input type="checkbox" name="rmimg" value="<%= im %>"> entfernen</label>
+              </div>
+            <% }) %>
+          </div>
+          <input type="hidden" name="img_order" id="imgOrder" value="<%= allImgs.join(',') %>">
+        <% } else { %>
+          <div class="pe-imgprev"><span class="noimg">Kein Bild</span></div>
+        <% } %>
+        <label class="fld" style="margin-top:12px"><span>Bilder hinzufügen (mehrere möglich)</span><input type="file" name="gallery" accept="image/*" multiple></label>
+        <p class="hint">Neue Bilder werden hinten angehängt. Am besten Fotos auf weißem Hintergrund.</p>
+      </div>
+      <script>
+      (function(){
+        var box=document.getElementById('imgSort'); if(!box) return;
+        var hidden=document.getElementById('imgOrder'); var dragEl=null;
+        function sync(){
+          var cards=[].slice.call(box.querySelectorAll('.pe-imgcard'));
+          hidden.value=cards.map(function(c){return c.dataset.img;}).join(',');
+          cards.forEach(function(c,i){ c.classList.toggle('is-title', i===0); });
+        }
+        box.addEventListener('dragstart', function(e){ var c=e.target.closest('.pe-imgcard'); dragEl=c; if(c) c.classList.add('dragging'); });
+        box.addEventListener('dragend', function(){ if(dragEl) dragEl.classList.remove('dragging'); dragEl=null; sync(); });
+        box.addEventListener('dragover', function(e){
+          e.preventDefault(); if(!dragEl) return;
+          var after=null, cards=[].slice.call(box.querySelectorAll('.pe-imgcard:not(.dragging)'));
+          for(var i=0;i<cards.length;i++){ var r=cards[i].getBoundingClientRect(); if(e.clientY < r.top + r.height/2){ after=cards[i]; break; } }
+          if(after) box.insertBefore(dragEl, after); else box.appendChild(dragEl);
+        });
+      })();
+      </script>
+
+      <div class="panel pe-card">
+        <h3>Preis</h3>
+        <label class="fld"><span>Preis (€, netto) *</span><input name="price" value="<%= euro(p.price_cents) %>" placeholder="99,00" required></label>
+        <label class="fld"><span>Statt-Preis / Vergleichspreis (€)</span><input name="compare" value="<%= euro(p.compare_cents) %>" placeholder="129,00"></label>
+      </div>
+
+      <div class="panel pe-card">
+        <h3>Einordnung</h3>
+        <label class="fld"><span>Gruppe</span>
+          <select name="product_group">
+            <option value="guellefass" <%= p.product_group==='guellefass'?'selected':'' %>>Güllefässer / Wasserwagen</option>
+            <option value="seilwinde" <%= p.product_group==='seilwinde'?'selected':'' %>>Seilwinden</option>
+            <option value="saege" <%= p.product_group==='saege'?'selected':'' %>>Sägen</option>
+            <option value="erntebox" <%= p.product_group==='erntebox'?'selected':'' %>>Ernteboxen</option>
+          </select>
+        </label>
+        <label class="fld"><span>Kategorie (Filter, z. B. mit-klappe, ohne-klappe, lackiert, sondermasse)</span><input name="category" value="<%= p.category %>"></label>
+        <label class="fld"><span>Farb-Optionen (eine je Zeile – z. B. Blau (RAL 5010)). Leer = keine Auswahl.</span><textarea name="color_options" rows="4"><%= (h.safeParse(p.color_options, []) || []).join('\n') %></textarea></label>
+        <label class="fld"><span>Reihenfolge (kleiner = weiter vorne)</span><input type="number" name="sort_order" value="<%= p.sort_order %>"></label>
+        <div class="pe-checks">
+          <label class="chk"><input type="checkbox" name="bestseller" <%= p.bestseller?'checked':'' %>><span>Bestseller (Startseite)</span></label>
+          <p class="hint" style="margin:-2px 0 6px">Pro Kategorie nur ein Bestseller. Setzt man ihn hier, verliert das bisherige Produkt derselben Gruppe den Status automatisch.</p>
+          <label class="chk"><input type="checkbox" name="sold_out" <%= p.sold_out?'checked':'' %>><span>Ausverkauft</span></label>
+          <label class="chk"><input type="checkbox" name="active" <%= p.active?'checked':'' %>><span>Aktiv (im Shop sichtbar)</span></label>
+        </div>
+      </div>
+
+      <div class="panel pe-card">
+        <h3>Mengen</h3>
+        <div class="pe-two">
+          <label class="fld"><span>Mindestmenge</span><input type="number" name="min_order" value="<%= p.min_order || 1 %>" min="1"></label>
+          <label class="fld"><span>Maximalmenge</span><input type="number" name="max_order" value="<%= p.max_order || 200 %>" min="1"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pe-actions">
+    <a class="btn btn-line" href="/admin/produkte">Abbrechen</a>
+    <button class="btn btn-accent" type="submit"><%= mode === 'create' ? 'Produkt anlegen' : 'Änderungen speichern' %></button>
+  </div>
+</form>
+
+<% if (mode === 'edit') { %>
+<div class="panel pe-card" style="margin-top:22px;border-color:rgba(192,40,27,.3)">
+  <h3 style="color:#c0281b">Produkt löschen</h3>
+  <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px">Entfernt das Produkt dauerhaft aus dem Shop. Bereits vorhandene Bestellungen bleiben unberührt.</p>
+  <form method="post" action="/admin/produkte/<%= p.id %>/loeschen" onsubmit="return confirm('Dieses Produkt wirklich löschen?')">
+    <input type="hidden" name="confirm" value="ja">
+    <button class="btn" style="background:#c0281b;color:#fff" type="submit">Endgültig löschen</button>
+  </form>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Agrarhero</title>
+<meta name="description" content="<%= (typeof metaDesc !== 'undefined' && metaDesc) ? metaDesc : 'Agrartechnik direkt vom Fachhändler – Güllefässer, Seilwinden und mehr. Faire Preise, deutschlandweite Lieferung.' %>">
+<meta name="robots" content="index, follow">
+<% var _canon = (typeof baseUrl!=='undefined'?baseUrl:'') + (typeof currentUrl!=='undefined'?currentUrl:(currentPath||'/')); %>
+<link rel="canonical" href="<%= _canon %>">
+<meta name="theme-color" content="#2f5d34">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Agrarhero">
+<meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'Agrarhero' %>">
+<meta property="og:description" content="<%= (typeof metaDesc !== 'undefined' && metaDesc) ? metaDesc : 'Agrartechnik von Agrarhero – Güllefässer, Seilwinden und mehr. Faire Preise, deutschlandweite Lieferung.' %>">
+<meta property="og:url" content="<%= _canon %>">
+<meta property="og:image" content="<%= (typeof baseUrl!=='undefined'?baseUrl:'') %>/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<% var _cl=((typeof seller!=='undefined'&&seller.cityLine)||'').trim(); var _zip=(_cl.match(/^\d{4,5}/)||[''])[0]; var _city=_cl.replace(/^\d{4,5}\s*/,''); %>
+<script type="application/ld+json"><%- JSON.stringify({"@context":"https://schema.org","@type":"Organization","name":"Agrarhero","legalName":(typeof seller!=='undefined'?seller.name:''),"url":(typeof baseUrl!=='undefined'?baseUrl:''),"logo":(typeof baseUrl!=='undefined'?baseUrl:'')+"/favicon-512x512.png","image":(typeof baseUrl!=='undefined'?baseUrl:'')+"/og-image.jpg","email":(typeof seller!=='undefined'?seller.email:''),"address":{"@type":"PostalAddress","streetAddress":(typeof seller!=='undefined'?seller.street:''),"postalCode":_zip,"addressLocality":_city,"addressCountry":"DE"}}) %></script>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="stylesheet" href="/css/styles.css">
+<script>(function(){try{if(localStorage.getItem('gb-theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body>
+
+<%
+  var bslides = [];
+  if (settings.promo_active && settings.banner_promo_active) bslides.push('promo');
+  if (settings.banner_job_active) bslides.push('job');
+  var bdur = (settings.banner_seconds || 6) * 1000;
+%>
+<% if (bslides.length) { %>
+<div class="promo-bar" id="promoBar">
+  <div class="wrap">
+    <div class="promo-slides">
+      <% bslides.forEach(function(s, idx){ %>
+        <% if (s === 'promo') { %>
+          <div class="promo-slide<%= idx===0 ? ' is-active' : '' %>" data-dur="<%= bdur %>">
+            <span class="promo-tag">Aktion</span>
+            <span class="promo-txt"><%= settings.banner_promo %></span>
+          </div>
+        <% } else { %>
+          <a class="promo-slide promo-job<%= idx===0 ? ' is-active' : '' %>" href="/karriere" data-dur="<%= bdur %>">
+            <span class="promo-tag tag-job">Wir stellen ein</span>
+            <span class="promo-txt"><%= settings.banner_job %></span>
+            <span class="promo-cta<%= currentPath === '/' ? ' ring' : '' %>">Jetzt direkt bewerben →</span>
+          </a>
+        <% } %>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="tb-left"><% if (settings.promo_active) { %><span class="tb-dot" aria-hidden="true"></span><%= settings.topbar_text %><% } else { %>Agrartechnik direkt vom Fachhändler &nbsp;<span class="dot">•</span>&nbsp; Deutschlandweiter Versand<% } %></div>
+    <div class="tb-right">
+      <span>✉ <%= (typeof seller !== 'undefined' && seller.email) ? seller.email : 'info@agrarhero.de' %></span>
+    </div>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="/">
+      <span class="mark"></span>
+      <span class="name">AGRAR<b>HERO</b></span>
+    </a>
+    <nav class="main">
+      <a href="/produkte?gruppe=guellefass" class="ncat <%= (typeof gruppe !== 'undefined' && gruppe === 'guellefass') ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="15" height="7" rx="3.5"/><path d="M17.5 9.5H20l1.5 3V15h-4"/><circle cx="7.5" cy="18" r="1.7"/><circle cx="16" cy="18" r="1.7"/></svg>
+        Güllefässer / Wasserwagen</a>
+      <a href="/produkte?gruppe=seilwinde" class="ncat <%= (typeof gruppe !== 'undefined' && gruppe === 'seilwinde') ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="5"/><path d="M8 9.2v5.6M13 12h5.5M18.5 12v4a2 2 0 0 1-2 2"/></svg>
+        Seilwinden</a>
+      <a href="/produkte?gruppe=saege" class="ncat <%= (typeof gruppe !== 'undefined' && gruppe === 'saege') ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8.5" width="8" height="6.5" rx="2"/><path d="M10.5 9.5H20l1 2-1 1.5h-9.5"/><path d="M13 13.5v1.6M16 13.5v1.6M19 13.5v1.6"/></svg>
+        Sägen</a>
+      <a href="/produkte?gruppe=erntebox" class="ncat <%= (typeof gruppe !== 'undefined' && gruppe === 'erntebox') ? 'active' : '' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.4 11.5H5.4z"/><path d="M9 7.5v11M15 7.5v11M4 11.5h16"/></svg>
+        Ernteboxen</a>
+      <span class="nav-div" aria-hidden="true"></span>
+      <a class="nlink" href="/#how">Ablauf</a>
+      <a class="nlink" href="/#faq">FAQ</a>
+      <a class="nlink <%= currentPath === '/kontakt' ? 'active' : '' %>" href="/kontakt">Kontakt</a>
+    </nav>
+    <div class="head-actions">
+      <button type="button" class="theme-toggle" aria-label="Hell/Dunkel umschalten" title="Hell/Dunkel umschalten"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg></button>
+      <% if (user && user.is_admin) { %>
+        <a class="icon-btn" href="/admin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          Admin
+        </a>
+      <% } else if (user) { %>
+        <div class="acct-menu">
+          <button type="button" class="icon-btn acct-toggle" onclick="this.closest('.acct-menu').classList.toggle('open')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            Mein Konto <span class="caret">▾</span>
+          </button>
+          <div class="acct-dd">
+            <div class="acct-dd-head"><%= user.first_name ? (user.first_name+' '+(user.last_name||'')) : user.email %></div>
+            <a href="/konto">Übersicht</a>
+            <a href="/konto/bestellungen">Meine Bestellungen</a>
+            <a href="/konto/daten">Meine Daten</a>
+            <a href="/konto/passwort">Passwort ändern</a>
+            <form method="post" action="/logout"><button type="submit">Abmelden</button></form>
+          </div>
+        </div>
+      <% } else { %>
+        <a class="btn-auth" href="/login">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          Anmelden <span class="ba-sep">/</span> Registrieren
+        </a>
+      <% } %>
+      <a class="icon-btn cart-link" id="cartLink" href="/warenkorb">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/></svg>
+        <span class="cart-word">Warenkorb</span> <span class="cart-badge" id="cartBadge"><%= cartCount %></span>
+        <span class="cart-sum" id="cartSum" style="<%= (typeof cartTotalCents !== 'undefined' && cartCount > 0) ? '' : 'display:none' %>"><%= h.euro(typeof cartTotalCents!=='undefined'?cartTotalCents:0) %></span>
+      </a>
+      <button type="button" class="nav-burger" id="navBurger" aria-label="Menü öffnen" aria-expanded="false" aria-controls="mobileNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobiles Off-Canvas-Menü (nur bis 1080px Breite sichtbar) -->
+<div class="mnav-backdrop" id="mnavBackdrop" hidden></div>
+<aside class="mnav" id="mobileNav" aria-hidden="true" aria-label="Hauptmenü">
+  <div class="mnav-head">
+    <a class="mnav-logo" href="/">AGRAR<b>HERO</b></a>
+    <button type="button" class="mnav-close" id="mnavClose" aria-label="Menü schließen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <nav class="mnav-links">
+    <span class="mnav-cap">Sortiment</span>
+    <a href="/produkte?gruppe=guellefass">Güllefässer / Wasserwagen</a>
+    <a href="/produkte?gruppe=seilwinde">Seilwinden</a>
+    <a href="/produkte?gruppe=saege">Sägen</a>
+    <a href="/produkte?gruppe=erntebox">Ernteboxen</a>
+    <span class="mnav-cap">Service</span>
+    <a href="/#how">Ablauf</a>
+    <a href="/#faq">FAQ</a>
+    <a href="/kontakt">Kontakt</a>
+    <% if (user && user.is_admin) { %>
+      <span class="mnav-cap">Konto</span>
+      <a href="/admin">Admin-Bereich</a>
+      <form method="post" action="/logout"><button type="submit" class="mnav-logout">Abmelden</button></form>
+    <% } else if (user) { %>
+      <span class="mnav-cap">Mein Konto</span>
+      <a href="/konto">Übersicht</a>
+      <a href="/konto/bestellungen">Meine Bestellungen</a>
+      <a href="/konto/daten">Meine Daten</a>
+      <a href="/konto/passwort">Passwort ändern</a>
+      <form method="post" action="/logout"><button type="submit" class="mnav-logout">Abmelden</button></form>
+    <% } else { %>
+      <span class="mnav-cap">Konto</span>
+      <a href="/login">Anmelden</a>
+      <a href="/registrieren">Konto erstellen</a>
+    <% } %>
+  </nav>
+</aside>
+
+<% if (flash) { %>
+  <div class="flash <%= flash.type === 'cartadd' ? 'success' : flash.type %>"><%= flash.msg %></div>
+<% } %>

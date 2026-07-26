@@ -1,0 +1,51 @@
+<% var _stock = (p.stock != null) ? Number(p.stock) : null;
+   var _soldout = p.sold_out || (_stock != null && _stock <= 0);
+   var _isBox = (p.product_group === 'erntebox');
+   var _almostSold = (_stock != null && _stock > 0 && _isBox && _stock <= 150);
+   var _lowStock = (_stock != null && _stock > 0 && !_almostSold && _stock <= (_isBox ? 300 : 8));
+   var _feats = h.safeParse(p.features, []);
+   var _war = _feats.find(function(f){ return /garantie/i.test(f); });
+   var _warShort = _war ? _war.replace(/Monate/i,'Mon.') : '';
+   var _specs = _feats.filter(function(f){ return !/garantie/i.test(f); }).slice(0,3);
+   var _hasVar = h.safeParse(p.variants, []).length > 0; %>
+<div class="card<%= _soldout ? ' is-sold' : '' %>">
+  <div class="thumb">
+    <% if (p.image) { %><img class="thumb-img" src="/img/products/<%= p.image %>" alt="<%= p.name %>" loading="lazy"><% } else { %><div class="mini"></div><% } %>
+    <span class="tile-badges">
+      <% if (p.sold_out) { %><span class="save save-sold">AUSVERKAUFT</span><% } else { %><span class="save save-new">NEU</span><% } %>
+    </span>
+    <% if (p.bestseller && !p.sold_out) { %><span class="bs-badge">★ Beliebt</span><% } %>
+  </div>
+  <div class="body">
+    <div class="type"><%= p.type %></div>
+    <h3><a href="/produkt/<%= p.slug %>"><%= p.name %></a></h3>
+    <%- include('stars', { avg: p.ratingAvg, count: p.ratingCount, showValue: true }) %>
+    <% if (p.baujahr || _warShort) { %>
+      <div class="tmeta">
+        <% if (p.baujahr) { %><span class="tchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Baujahr <%= p.baujahr %></span><% } %>
+        <% if (_warShort) { %><span class="tchip is-war"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><%= _warShort %></span><% } %>
+      </div>
+    <% } %>
+    <ul><% _specs.forEach(function(f){ %><li><%= f %></li><% }) %></ul>
+    <div class="price"><span class="now"><% if (_hasVar) { %><span style="font-size:.62em;font-weight:600;color:var(--muted)">ab </span><% } %><%= h.euro(p.price_cents) %></span><span class="gross">(Brutto <%= h.euro(Math.round(p.price_cents*1.19)) %>)</span><% if (p.compare_cents){ %><span class="was"><%= h.euro(p.compare_cents) %></span><% } %></div>
+    <span class="net">zzgl. MwSt. · pro Stück</span>
+    <% if (_soldout) { %><span class="stock stock-crit"><span class="stock-dot"></span>Derzeit ausverkauft</span>
+    <% } else if (_almostSold) { %><span class="stock stock-crit"><span class="stock-dot"></span>So gut wie ausverkauft</span>
+    <% } else if (_lowStock) { %><span class="stock stock-low"><span class="stock-dot"></span>Nur noch wenige verfügbar</span>
+    <% } else { %><span class="stock stock-ok"><span class="stock-dot"></span>Auf Lager · sofort lieferbar</span><% } %>
+    <% if ((p.min_order||1) > 1) { %><span class="minnote">Mindestbestellmenge: <%= p.min_order %> Stück</span><% } %>
+    <div class="row">
+      <a class="btn btn-line btn-sm" href="/produkt/<%= p.slug %>">Details</a>
+      <% if (_soldout) { %>
+        <button class="btn btn-sold btn-sm btn-block" type="button" disabled>Ausverkauft</button>
+      <% } else if (_hasVar) { %>
+        <a class="btn btn-accent btn-sm" href="/produkt/<%= p.slug %>" style="flex:1;text-align:center">Auswählen ▸</a>
+      <% } else { %>
+        <form method="post" action="/warenkorb/hinzufuegen" style="flex:1">
+          <input type="hidden" name="product_id" value="<%= p.id %>"><input type="hidden" name="quantity" value="<%= p.min_order || 1 %>">
+          <button class="btn btn-accent btn-sm btn-block" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/></svg>In den Warenkorb</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</div>

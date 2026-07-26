@@ -1,0 +1,17 @@
+<aside class="acct-side">
+  <div class="acct-user">
+    <div class="acct-avatar"><%= (user.first_name || user.email || '?').slice(0,1).toUpperCase() %></div>
+    <div class="acct-uwrap">
+      <div class="acct-name"><%= user.first_name ? (user.first_name + ' ' + (user.last_name||'')) : user.email %></div>
+      <% if (user.customer_type !== 'privat' && user.company) { %><div class="acct-company"><%= user.company %></div><% } %>
+      <div class="acct-mail"><%= user.email %></div>
+    </div>
+  </div>
+  <nav class="acct-nav">
+    <a href="/konto" class="<%= active==='overview'?'active':'' %>"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Übersicht</a>
+    <a href="/konto/bestellungen" class="<%= active==='orders'?'active':'' %>"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11.2V21"/></svg></span> Meine Bestellungen</a>
+    <a href="/konto/daten" class="<%= active==='data'?'active':'' %>"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span> Meine Daten</a>
+    <a href="/konto/passwort" class="<%= active==='password'?'active':'' %>"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span> Passwort ändern</a>
+    <form method="post" action="/logout"><button type="submit"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span> Abmelden</button></form>
+  </nav>
+</aside>

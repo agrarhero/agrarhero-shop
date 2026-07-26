@@ -1,0 +1,75 @@
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="/" style="margin-bottom:14px">
+          <span class="mark"></span>
+          <span class="name">AGRAR<b>HERO</b></span>
+        </a>
+        <p style="max-width:32ch">Ihr Fachhändler für Agrartechnik und Hofbedarf – solide Technik zu fairen Preisen, deutschlandweit.</p>
+      </div>
+      <div>
+        <h4>Sortiment</h4>
+        <a href="/produkte?gruppe=guellefass">Güllefässer / Wasserwagen</a>
+        <a href="/produkte?gruppe=seilwinde">Seilwinden</a>
+        <a href="/produkte?gruppe=saege">Sägen</a>
+        <a href="/produkte?gruppe=erntebox">Ernteboxen</a>
+      </div>
+      <div>
+        <h4>Service</h4>
+        <a href="/#how">So funktioniert's</a>
+        <a href="/kontakt">Kontakt</a>
+        <a href="/konto">Mein Konto</a>
+        <a href="/warenkorb">Warenkorb</a>
+      </div>
+      <div>
+        <h4>Rechtliches</h4>
+        <a href="/impressum">Impressum</a>
+        <a href="/agb">AGB</a>
+        <a href="/datenschutz">Datenschutz</a>
+        <a href="/agb#widerruf">Widerrufsrecht</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <%= new Date().getFullYear() %> Agrarhero<% if (typeof seller !== 'undefined' && seller.name) { %> · <%= seller.name %><% } %></span>
+    </div>
+  </div>
+</footer>
+<script src="/js/main.js"></script>
+<script>
+// Live-Praesenz: sanfter Heartbeat, damit "gerade online" im Admin stimmt.
+// Pausiert bei verstecktem Tab; sendet sofort beim Zurueckkehren.
+(function(){
+  var INTERVAL = 60000, last = 0, timer = null;
+  function ping(){
+    if (document.visibilityState !== 'visible') return;
+    last = Date.now();
+    try { fetch('/aktiv', { method:'GET', cache:'no-store', keepalive:true }).catch(function(){}); } catch(e){}
+  }
+  function start(){ if (timer) return; ping(); timer = setInterval(ping, INTERVAL); }
+  function stop(){ if (timer){ clearInterval(timer); timer = null; } }
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible'){ if (Date.now()-last > 30000) ping(); start(); }
+    else stop();
+  });
+  start();
+})();
+</script>
+<!-- Cookie-Hinweis (nur technisch notwendige Cookies) -->
+<div class="cookie-bar" id="cookieBar" hidden>
+  <div class="cookie-inner">
+    <span class="cookie-txt">Wir verwenden nur <strong>technisch notwendige Cookies</strong>, damit Login und Warenkorb funktionieren. Mehr dazu in der <a href="/datenschutz">Datenschutzerkl&auml;rung</a>.</span>
+    <button type="button" class="cookie-ok" id="cookieOk">Akzeptieren</button>
+  </div>
+</div>
+<script>
+(function(){
+  try{ if(localStorage.getItem('gb-cookie-ok')==='1') return; }catch(e){}
+  var bar=document.getElementById('cookieBar'); if(!bar) return;
+  bar.hidden=false;
+  var ok=document.getElementById('cookieOk');
+  if(ok) ok.addEventListener('click',function(){ try{localStorage.setItem('gb-cookie-ok','1');}catch(e){} bar.hidden=true; });
+})();
+</script>
+</body>
+</html>

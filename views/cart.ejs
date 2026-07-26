@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+<% var _wv = (typeof user !== 'undefined' && user && user.min_order_waived) ? true : false; %>
+
+<div class="page-head">
+  <div class="wrap"><div class="crumb"><a href="/">Start</a> › Warenkorb</div><h1>Warenkorb</h1></div>
+</div>
+
+<section class="block">
+  <div class="wrap">
+    <% if (items.length === 0) { %>
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/></svg>
+        <h2 style="margin-bottom:8px">Ihr Warenkorb ist leer</h2>
+        <p style="margin-bottom:22px">Stöbern Sie in unserem Agrartechnik-Sortiment.</p>
+        <a class="btn btn-accent" href="/produkte">Zum Sortiment ▸</a>
+      </div>
+    <% } else { %>
+    <div class="cart-layout">
+      <div class="cart-items">
+        <div class="ci-count"><%= items.length %> <%= items.length === 1 ? 'Artikel' : 'Artikel' %> im Warenkorb</div>
+        <% items.forEach(function(it){ var _min = _wv ? 1 : ((it.product && it.product.min_order) || 1); var _max = (it.product && it.product.max_order) || 200; %>
+          <div class="citem">
+            <a class="ci-thumb" href="/produkt/<%= it.product.slug %>"><% if (it.product && it.product.image) { %><img src="/img/products/<%= it.product.image %>" alt="<%= it.name %>"><% } else { %><span class="mini-crate"></span><% } %></a>
+            <div class="ci-info">
+              <a class="ci-name" href="/produkt/<%= it.product.slug %>"><%= it.name %></a>
+              <div class="ci-meta"><%= it.type %><% if (it.variant) { %> · <span class="v"><%= it.variant %></span><% } %><% if (it.color) { %> · <span class="v">Farbe: <%= it.color %></span><% } %></div>
+              <div class="ci-art">Art.-Nr. <span><%= h.artNr(it.product.slug) %></span></div>
+              <div class="ci-unit-row">Einzelpreis <b><%= h.euro(it.unit_cents) %></b> netto</div>
+            </div>
+            <div class="ci-side">
+              <form method="post" action="/warenkorb/aktualisieren" class="ci-stepper" data-min="<%= _min %>" data-max="<%= _max %>">
+                <input type="hidden" name="key" value="<%= it.key %>">
+                <button type="button" class="cs-btn" data-dir="-1" aria-label="weniger">−</button>
+                <input type="number" name="quantity" value="<%= it.quantity %>" min="<%= _min %>" max="<%= _max %>" onchange="this.form.submit()" aria-label="Menge">
+                <button type="button" class="cs-btn" data-dir="1" aria-label="mehr">+</button>
+              </form>
+              <div class="ci-linesum"><%= h.euro(it.unit_cents * it.quantity) %></div>
+              <form method="post" action="/warenkorb/entfernen">
+                <input type="hidden" name="key" value="<%= it.key %>">
+                <button class="ci-remove" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Entfernen</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <script>
+      document.querySelectorAll('.ci-stepper').forEach(function(f){
+        var inp=f.querySelector('input[name="quantity"]');
+        var mn=parseInt(f.dataset.min,10)||1, mx=parseInt(f.dataset.max,10)||200;
+        f.querySelectorAll('.cs-btn').forEach(function(b){
+          b.addEventListener('click',function(){
+            var v=(parseInt(inp.value,10)||mn)+(b.dataset.dir==='1'?1:-1);
+            v=Math.max(mn,Math.min(mx,v));
+            if(v!==(parseInt(inp.value,10)||mn)){inp.value=v; f.submit();}
+          });
+        });
+      });
+      </script>
+
+      <div class="summary">
+        <h3>Zusammenfassung</h3>
+        <div class="line"><span>Zwischensumme (netto)</span><span><%= h.euro(totals.subtotal) %></span></div>
+        <div class="line"><span>Versand</span><span><% if (totals.shipping > 0) { %><%= h.euro(totals.shipping) %><% } else { %><span class="ship-free">kostenlos</span><% } %></span></div>
+        <div class="line"><span>zzgl. <%= totals.taxRate %> % MwSt.</span><span><%= h.euro(totals.tax) %></span></div>
+        <div class="line total"><span>Gesamt</span><span><%= h.euro(totals.gross) %></span></div>
+        <a class="btn btn-accent btn-block" href="/kasse" style="margin-top:18px">Zur Kasse ▸</a>
+        <a class="btn btn-line btn-block" href="/produkte" style="margin-top:10px">Weiter einkaufen</a>
+        <p class="form-note" style="margin-top:14px">Versandkosten werden im Rahmen der Rechnungsstellung mitgeteilt.</p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

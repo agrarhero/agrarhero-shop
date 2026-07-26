@@ -1,0 +1,56 @@
+<%- include('../partials/admin-header') %>
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 style="font-size:2rem">Bestellungen</h1>
+    <p style="color:var(--muted);font-size:.92rem">Prüfen Sie eingehende Bestellungen und steuern Sie den Ablauf.</p>
+  </div>
+</div>
+
+<div class="kpis kpis-9">
+  <% kpis.forEach(function(k){ var key=k[0], titel=k[1]; var n = key==='' ? counts.total : (counts[key]||0);
+       var active = (filter===key); var col = key==='' ? '' : stat.color(key); %>
+    <a class="kpi <%= active ? 'active':'' %> <%= col ? 'kpi-'+col : '' %>" href="/admin<%= key ? '?status='+key : '' %>">
+      <div class="n"><%= n %></div><div class="l"><%= titel %></div>
+    </a>
+  <% }) %>
+</div>
+
+<div class="panel" style="padding:6px 10px">
+  <% if (orders.length === 0) { %>
+    <div style="padding:44px;text-align:center;color:var(--muted)">Keine Bestellungen in dieser Ansicht.</div>
+  <% } else { %>
+  <table class="tbl">
+    <thead><tr>
+      <th>Bestellung</th><th>Kunde</th><th>Datum</th><th class="c">Pos.</th>
+      <th class="r">Betrag</th><th>Status</th><th>IP / Herkunft</th><th></th>
+    </tr></thead>
+    <tbody>
+    <% orders.forEach(function(o){ var col = stat.color(o.status); %>
+      <tr class="<%= col ? 'row-'+col : '' %>">
+        <td style="font-weight:600"><%= o.order_number %></td>
+        <td><% if (o.sec) { %><a href="/admin/kunden/<%= o.sec.uid %>" class="cust-link"><%= (o.cust_first_name||'') + ' ' + (o.cust_last_name||'') %></a><% } else { %><%= (o.cust_first_name||'') + ' ' + (o.cust_last_name||'') %><% } %><div style="font-size:.8rem;color:var(--muted)"><%= o.cust_email %></div></td>
+        <td><%= h.dateDE(o.created_at) %></td>
+        <td class="c"><%= o.itemCount %></td>
+        <td class="r"><%= h.euro(o.totals.gross) %></td>
+        <td><span class="badge b-<%= col || 'grey' %>"><%= stat.label(o.status) %></span></td>
+        <td style="font-size:.82rem;line-height:1.35">
+          <% if (o.sec) { %><a class="secscore ss-<%= o.sec.level %>" href="/admin/kunden/<%= o.sec.uid %>#sicherheit" title="Sicherheits-Check dieses Kunden ansehen"><span class="ss-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z"/></svg>Sicherheitscheck</span><span class="ss-score"><%= o.sec.score %>/<%= o.sec.max %></span></a><div class="orig-tag" title="Allgemeine Herkunft – nur Info, kein Score-Einfluss"><%= o.sec.origin.label %></div><% } %>
+          <% if (o.ip) { %>
+            <div class="ip-line">
+            <span style="font-size:1rem"><%= o.flag || '🏳️' %></span>
+            <strong><%= o.geo_country || (o.ip==='::1'||o.ip==='127.0.0.1' ? 'Lokal':'—') %></strong>
+            <% if (o.geo_region) { %><br><span style="color:var(--muted)"><%= o.geo_region %></span><% } %>
+            <br><span style="color:var(--muted);font-family:monospace"><%= o.ip %></span>
+            </div>
+          <% } else if (!o.sec) { %><span style="color:var(--muted)">—</span><% } %>
+        </td>
+        <td class="r"><a class="btn btn-dark btn-sm" href="/admin/bestellung/<%= o.id %>">Prüfen ▸</a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('../partials/admin-footer') %>

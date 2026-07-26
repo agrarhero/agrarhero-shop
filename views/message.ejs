@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+<section class="block">
+  <div class="wrap tinywrap" style="max-width:560px;text-align:center">
+    <div style="width:60px;height:60px;border-radius:50%;background:#fff4e8;display:grid;place-items:center;margin:0 auto 18px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4a9b2f" stroke-width="1.9" style="width:30px;height:30px"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+    </div>
+    <h1 style="font-size:2rem;margin-bottom:12px"><%= heading %></h1>
+    <p style="color:var(--muted);line-height:1.7;font-size:1.02rem"><%- message %></p>
+    <% if (linkHref) { %>
+      <a class="btn btn-accent" href="<%= linkHref %>" style="margin-top:22px"><%= linkText %></a>
+    <% } %>
+    <% if (typeof spamNote !== 'undefined' && spamNote) { %>
+      <div class="spam-hint" style="margin-top:22px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <span><strong>Keine E-Mail erhalten?</strong> Bitte sehen Sie auch in Ihrem <strong>Spam- bzw. Junk-Ordner</strong> nach – automatische Nachrichten landen dort gelegentlich. Fügen Sie uns am besten zu Ihren Kontakten hinzu, damit künftige E-Mails sicher ankommen.</span>
+      </div>
+    <% } %>
+    <% if (typeof resend !== 'undefined' && resend) { %>
+      <div class="form-card" style="margin-top:28px;text-align:left">
+        <div class="section-title" style="margin-top:0">Keine E-Mail erhalten?</div>
+        <form method="post" action="/bestaetigung-erneut" data-validate>
+          <div class="field"><label>Ihre E-Mail-Adresse</label><input type="email" name="email" value="<%= resendEmail || '' %>" required></div>
+          <button class="btn btn-line btn-block" type="submit">Bestätigungsmail erneut senden</button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<% if (typeof popup !== 'undefined' && popup) { %>
+<div class="gb-modal" id="regModal" role="dialog" aria-modal="true" aria-labelledby="regModalTitle">
+  <div class="gb-box">
+    <div class="gb-ic" aria-hidden="true">✉️</div>
+    <h3 class="gb-title" id="regModalTitle">Bitte bestätigen Sie Ihre E-Mail</h3>
+    <p class="gb-text">Wir haben eine Bestätigungs-E-Mail<% if (typeof popupEmail !== 'undefined' && popupEmail) { %> an <strong><%= popupEmail %></strong><% } %> gesendet. Bitte klicken Sie auf den Link darin, um Ihr Konto zu aktivieren.<br><br><strong>Wichtig:</strong> Sollte die E-Mail nicht innerhalb weniger Minuten ankommen, prüfen Sie bitte auch Ihren <strong>Spam- bzw. Junk-Ordner</strong> – gelegentlich landen automatische Nachrichten dort.</p>
+    <div class="gb-acts"><button type="button" class="gb-ok gb-info" id="regModalOk">Verstanden</button></div>
+  </div>
+</div>
+<script>
+(function(){
+  var m=document.getElementById('regModal'); if(!m) return;
+  function close(){ m.style.display='none'; document.body.style.overflow=''; }
+  document.body.style.overflow='hidden';
+  var ok=document.getElementById('regModalOk'); if(ok) ok.addEventListener('click',close);
+  m.addEventListener('click',function(e){ if(e.target===m) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+<% } %>
+<%- include('partials/footer') %>

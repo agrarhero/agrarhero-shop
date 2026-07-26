@@ -1,0 +1,116 @@
+<%- include('../partials/admin-header') %>
+<div style="margin-bottom:16px">
+  <div style="font-size:.85rem"><a href="/admin/kunden" style="color:var(--muted);text-decoration:none">← Zurück zu Kunden</a></div>
+  <h1 style="font-size:2rem;margin:.2rem 0">Gäste auf der Seite</h1>
+  <p style="color:var(--muted);font-size:.92rem">Nicht angemeldete Besucher der letzten 3&nbsp;Tage (Bots ausgeschlossen). Diese Liste wird automatisch nach 3&nbsp;Tagen gelöscht.</p>
+  <div style="margin-top:8px;font-size:.85rem">
+    <% if (typeof showAll !== 'undefined' && showAll) { %>
+      <span style="color:var(--muted)">Alle Besucher inkl. mutmaßlicher Bots.</span> <a href="/admin/gaeste" style="color:var(--accent);font-weight:600;text-decoration:none">Nur echte Besucher anzeigen</a>
+    <% } else { %>
+      <span style="color:var(--muted)">Nur echte Besucher.<% if (typeof hidden !== 'undefined' && hidden > 0) { %> <%= hidden %> mutmaßliche Bots ausgeblendet.<% } %></span> <a href="/admin/gaeste?alle=1" style="color:var(--accent);font-weight:600;text-decoration:none">Alle anzeigen (zur Kontrolle)</a>
+    <% } %>
+  </div>
+</div>
+
+<div class="live-bar">
+  <div class="live-card is-on">
+    <span class="lc-dot"></span>
+    <div><div class="lc-n"><%= onlineNow %></div><div class="lc-l">gerade online</div></div>
+  </div>
+  <div class="live-card is-guest">
+    <span class="lc-eye" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+    </span>
+    <div><div class="lc-n"><%= guests.length %></div><div class="lc-l">Gäste (letzte 3 Tage)</div></div>
+  </div>
+  <div class="live-note">
+    <span class="pulse-live"></span> Diese Seite aktualisiert sich alle 20&nbsp;Sek.<br>
+    „Online" = Aktivität in den letzten 10&nbsp;Minuten.
+  </div>
+</div>
+
+<% if (!guests.length) { %>
+  <div class="panel" style="padding:26px;text-align:center;color:var(--muted)">Noch keine Gäste in den letzten 3&nbsp;Tagen.</div>
+<% } %>
+
+<% guests.forEach(function(g){ %>
+  <div class="panel" style="padding:0;margin-bottom:14px;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="pres <%= g.online ? 'is-on' : 'is-off' %>"><span class="pres-dot"></span><span class="pres-txt"><%= g.online ? 'Online' : 'Offline' %></span></span>
+        <strong style="font-size:1.02rem"><%= g.dev.browser %> · <%= g.dev.os %></strong>
+        <span style="font-size:.82rem;padding:2px 9px;border-radius:20px;background:<%= g.dev.mobile ? 'rgba(229,102,31,.14)' : 'rgba(35,42,51,.10)' %>;color:var(--muted)"><%= g.dev.device %></span>
+        <% if (g.suspect) { %><span style="font-size:.78rem;padding:2px 9px;border-radius:20px;background:rgba(211,58,44,.14);color:#c5362a;font-weight:600">mutmaßlicher Bot</span><% } %>
+      </div>
+      <div style="font-size:.85rem;color:var(--muted)">letzte Aktivität: <%= h.relTime(g.last) %></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 22px;padding:14px 16px">
+      <div>
+        <div class="gk">IP-Adresse</div>
+        <div class="gv"><%= g.ip || '—' %></div>
+      </div>
+      <div>
+        <div class="gk">Herkunft (Standort)</div>
+        <div class="gv"><%= g.flag ? g.flag + ' ' : '' %><%= [g.city, g.region, g.country].filter(Boolean).join(', ') || 'unbekannt' %></div>
+      </div>
+      <div>
+        <div class="gk">Gekommen über</div>
+        <div class="gv"><%= g.ref ? g.ref : 'direkt / unbekannt' %></div>
+      </div>
+      <div>
+        <div class="gk">Erste Aktivität</div>
+        <div class="gv"><%= h.dateTimeDE(g.first) %></div>
+      </div>
+      <div>
+        <div class="gk">Sitzungsdauer</div>
+        <div class="gv"><%= g.durationMin %> Min. · <%= g.pageCount %> Seitenaufrufe</div>
+      </div>
+      <div>
+        <div class="gk">Gerät</div>
+        <div class="gv"><%= g.dev.mobile ? 'Mobil' : 'Desktop' %></div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px 12px">
+      <div class="gk" style="margin-bottom:6px">Angesehene Seiten (neueste zuerst)</div>
+      <% if (!g.pages.length) { %>
+        <div style="color:var(--muted);font-size:.88rem">—</div>
+      <% } else { %>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <% g.pages.forEach(function(p){ %>
+            <div style="display:flex;gap:10px;font-size:.86rem">
+              <span style="color:var(--muted);min-width:78px"><%= h.timeDE(p.t) %></span>
+              <span style="font-family:monospace"><%= p.p %></span>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <div style="padding:0 16px 14px">
+      <div class="gk" style="margin-bottom:6px">Warenkorb</div>
+      <% if (!g.cartItems.length) { %>
+        <div style="color:var(--muted);font-size:.88rem">leer</div>
+      <% } else { %>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <% g.cartItems.forEach(function(it){ %>
+            <div style="font-size:.9rem"><strong><%= it.qty %>×</strong> <%= it.name %> <span style="color:var(--muted)">(<%= h.euro(it.unit_cents) %>/Stk.)</span></div>
+          <% }) %>
+          <div style="font-size:.9rem;margin-top:2px"><strong>Warenkorb-Wert: <%= h.euro(g.cartGross) %></strong> (<%= g.cartCount %> Stk., inkl. MwSt.)</div>
+        </div>
+      <% } %>
+    </div>
+
+    <div style="padding:8px 16px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);word-break:break-all">
+      User-Agent: <%= g.ua || '—' %>
+    </div>
+  </div>
+<% }) %>
+
+<style>
+  .gk{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
+  .gv{font-size:.95rem;font-weight:600}
+</style>
+<script>setTimeout(function(){ location.reload(); }, 20000);</script>
+<%- include('../partials/admin-footer') %>

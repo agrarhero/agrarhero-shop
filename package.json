@@ -1,0 +1,11 @@
+{
+  "name": "agrarhero-shop",
+  "version": "1.0.0",
+  "description": "Agrarhero – Online-Shop für Agrartechnik (nur Node-Bordmittel).",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "seed": "node seed.js", "reset": "node seed.js --reset" },
+  "engines": { "node": ">=22.5.0" },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {}
+}

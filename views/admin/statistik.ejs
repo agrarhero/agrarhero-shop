@@ -1,0 +1,169 @@
+<%- include('../partials/admin-header') %>
+<div style="margin-bottom:20px">
+  <h1 style="font-size:2rem">Statistik</h1>
+  <p style="color:var(--muted);font-size:.92rem">Umsatz, Bestellungen und beliebteste Produkte. „Umsatz" zählt bezahlte &amp; versendete Bestellungen (brutto).</p>
+</div>
+
+<div class="stat-kpis">
+  <div class="skpi"><div class="sk-l">Umsatz gesamt</div><div class="sk-v"><%= h.euro(revenueCents) %></div></div>
+  <div class="skpi"><div class="sk-l">Bezahlte Bestellungen</div><div class="sk-v"><%= orderCount %></div></div>
+  <div class="skpi"><div class="sk-l">Ø Bestellwert</div><div class="sk-v"><%= h.euro(avgCents) %></div></div>
+  <div class="skpi accent"><div class="sk-l">Offene Zahlungen</div><div class="sk-v"><%= h.euro(openTotal) %> <span style="font-size:.7rem;color:var(--muted)">(<%= open.length %>)</span></div></div>
+</div>
+
+<div class="panel pe-card" style="margin-top:20px">
+  <h3>Umsatz – letzte 6 Monate</h3>
+  <% var cw=680, ch=200, n=months.length, gap=22, bw=(cw-gap*(n-1))/n; %>
+  <svg viewBox="0 0 <%= cw %> <%= ch+40 %>" width="100%" style="max-width:720px;display:block">
+    <% months.forEach(function(mo, i){ var bh=Math.round(mo.cents/maxCents*ch); var x=i*(bw+gap); var y=ch-bh; %>
+      <rect x="<%= x %>" y="<%= y %>" width="<%= bw %>" height="<%= bh %>" rx="6" fill="#e5661f" opacity="0.92"></rect>
+      <text x="<%= x+bw/2 %>" y="<%= y-7 %>" text-anchor="middle" font-size="11" fill="#4a5566" font-family="Arial"><%= mo.cents ? (Math.round(mo.cents/100)).toLocaleString('de-DE')+' €' : '' %></text>
+      <text x="<%= x+bw/2 %>" y="<%= ch+18 %>" text-anchor="middle" font-size="12" fill="#8a929c" font-family="Arial"><%= mo.label %></text>
+    <% }) %>
+  </svg>
+</div>
+
+<div class="stat-two">
+  <div class="panel pe-card">
+    <h3>Meistverkaufte Produkte</h3>
+    <% if (!topProducts.length) { %><p class="hint">Noch keine Verkäufe.</p><% } else { %>
+      <table class="tbl"><tbody>
+        <% topProducts.forEach(function(t, i){ %>
+          <tr><td style="width:26px;color:var(--muted)"><%= i+1 %>.</td><td><%= t.name %></td><td class="c"><strong><%= t.qty %></strong> Stk.</td><td class="r"><%= h.euro(t.rev) %></td></tr>
+        <% }) %>
+      </tbody></table>
+    <% } %>
+  </div>
+  <div class="panel pe-card">
+    <h3>Meistgeklickte Produkte</h3>
+    <% if (!mostViewed.length) { %><p class="hint">Noch keine Aufrufe erfasst.</p><% } else { %>
+      <table class="tbl"><tbody>
+        <% mostViewed.forEach(function(v, i){ %>
+          <tr><td style="width:26px;color:var(--muted)"><%= i+1 %>.</td><td><a href="/produkt/<%= v.slug %>" target="_blank"><%= v.name %></a></td><td class="r"><strong><%= v.views %></strong> Aufrufe</td></tr>
+        <% }) %>
+      </tbody></table>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel pe-card" style="margin-top:20px">
+  <h3>Offene Zahlungen <span style="font-weight:400;color:var(--muted);font-size:.85rem">(Rechnung rausgeschickt, noch nicht bezahlt)</span></h3>
+  <div class="help-box">
+    <strong>Wie die Zahlungserinnerung funktioniert:</strong> Ab dem Tag, an dem die Rechnung rausgeht
+    („Rechnung raus"), läuft eine <b>Schutzfrist von 48 Stunden</b>. Erst danach lässt sich die
+    Zahlungserinnerung verschicken – so drängeln Sie keinen Kunden, der die Rechnung gerade erst bekommen hat.
+    Solange die Frist läuft, ist der Button <b>gesperrt</b> und zeigt einen Countdown, wann er freigeschaltet wird.
+    „Tage offen" zählt ab Rechnungsausgang; wird die Zahlungsfrist überschritten, erscheint <b>„überfällig"</b>.
+  </div>
+  <% if (!open.length) { %><p class="hint">Keine offenen Zahlungen. 🎉</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Bestellung</th><th>Kunde</th><th>Rechnung raus</th><th class="c">Tage offen</th><th class="r">Betrag</th><th>Erinnerung</th></tr></thead>
+      <tbody>
+        <% open.forEach(function(o){ %>
+          <tr class="<%= o.overdue ? 'row-red' : '' %>">
+            <td><a href="/admin/bestellung/<%= o.id %>"><%= o.order_number %></a></td>
+            <td><%= (o.cust_first_name||'')+' '+(o.cust_last_name||'') %><br><span style="color:var(--muted);font-size:.8rem"><%= o.cust_email %></span></td>
+            <td><% if (o.hasInvoice) { %><span style="font-size:.85rem">seit <%= h.dateDE(o.invoice_sent_at) %></span><% } else { %><span style="color:#c0392b;font-size:.82rem">noch keine Rechnung</span><% } %></td>
+            <td class="c"><%= o.days == null ? '–' : o.days %><% if (o.overdue) { %> <span class="pill pill-sold">überfällig</span><% } %></td>
+            <td class="r" style="font-weight:600"><%= h.euro(o.gross) %></td>
+            <td>
+              <% if (o.reminder_sent_at) { %>
+                <span class="rem-done">✓ gesendet: <%= h.dateDE(o.reminder_sent_at) %></span>
+                <% if (!o.locked) { %>
+                  <form method="post" action="/admin/bestellung/<%= o.id %>/erinnerung" id="remForm-<%= o.id %>" style="margin-top:6px">
+                    <button class="btn btn-line btn-sm" type="button" onclick="gbReminder('<%= o.id %>','<%= o.cust_email %>',true)">Erneut senden</button>
+                  </form>
+                <% } %>
+              <% } else if (o.locked) { %>
+                <button class="btn btn-dark btn-sm" type="button" disabled title="Erst 48 Std. nach Rechnungsausgang möglich">Erinnerung senden</button>
+                <% if (o.hasInvoice) { %>
+                  <div class="rem-timer" data-remain="<%= o.remainMs %>"><span class="rt-ic">⏳</span> frei in <span class="rt-val">–</span></div>
+                <% } else { %>
+                  <div class="rem-note">erst nach Rechnungsausgang</div>
+                <% } %>
+              <% } else { %>
+                <form method="post" action="/admin/bestellung/<%= o.id %>/erinnerung" id="remForm-<%= o.id %>">
+                  <button class="btn btn-dark btn-sm" type="button" onclick="gbReminder('<%= o.id %>','<%= o.cust_email %>',false)">Erinnerung senden</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<script>
+// Live-Countdown bis zur Freischaltung der Zahlungserinnerung (48-Std.-Sperre)
+(function(){
+  var timers = Array.prototype.slice.call(document.querySelectorAll('.rem-timer'));
+  if (!timers.length) return;
+  var ends = timers.map(function(t){ return { el: t.querySelector('.rt-val'), end: Date.now() + (parseInt(t.getAttribute('data-remain'),10)||0), row: t }; });
+  function fmt(ms){
+    if (ms <= 0) return '0 Min.';
+    var m = Math.floor(ms/60000), h = Math.floor(m/60); m = m % 60;
+    if (h > 0) return h + ' Std. ' + m + ' Min.';
+    return m + ' Min.';
+  }
+  function tick(){
+    var reload = false;
+    ends.forEach(function(o){
+      var left = o.end - Date.now();
+      if (left <= 0){ o.el.textContent = 'jetzt'; o.row.classList.add('rt-ready'); reload = true; }
+      else o.el.textContent = fmt(left);
+    });
+    if (reload) setTimeout(function(){ location.reload(); }, 1500);
+  }
+  tick(); setInterval(tick, 30000);
+})();
+</script>
+
+<!-- Zentriertes Bestätigungsfenster für die Zahlungserinnerung -->
+<style>
+  .gb-modal{position:fixed;inset:0;background:rgba(15,18,22,.62);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px}
+  .gb-modal.open{display:flex}
+  .gb-modal .gb-box{background:#fff;border-radius:14px;max-width:460px;width:100%;padding:32px;text-align:center;box-shadow:0 40px 90px -20px rgba(0,0,0,.6);animation:gbpop .16s ease-out}
+  @keyframes gbpop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+  .gb-modal .gb-ic{font-size:2.6rem;line-height:1;margin-bottom:8px}
+  .gb-modal h3{font-family:'Barlow Condensed','Inter',sans-serif;font-size:1.55rem;margin:0 0 12px;color:#14171c}
+  .gb-modal p{color:#6b7280;line-height:1.6;font-size:.96rem;margin:0}
+  .gb-modal .gb-acts{display:flex;gap:12px;margin-top:26px}
+  .gb-modal .gb-acts button{flex:1;padding:.85rem 1rem;border-radius:6px;font-weight:600;font-size:.98rem;cursor:pointer;font-family:'Inter',sans-serif}
+  .gb-modal .gb-cancel{background:#fff;border:1px solid #d5d9df;color:#14171c}
+  .gb-modal .gb-cancel:hover{border-color:#b6bcc5}
+  .gb-modal .gb-ok{background:#e5661f;border:1px solid #e5661f;color:#fff}
+  .gb-modal .gb-ok:hover{background:#c9520f}
+  body.gb-noscroll{overflow:hidden}
+</style>
+<div id="remModal" class="gb-modal" role="dialog" aria-modal="true" onclick="if(event.target===this)gbRemClose()">
+  <div class="gb-box">
+    <div class="gb-ic">📧</div>
+    <h3 id="remTitle">Zahlungserinnerung senden?</h3>
+    <p id="remText">Es wird eine Zahlungserinnerung per E-Mail an den Kunden gesendet.</p>
+    <div class="gb-acts">
+      <button type="button" class="gb-cancel" onclick="gbRemClose()">Abbrechen</button>
+      <button type="button" class="gb-ok" onclick="gbRemConfirm()">Ja, senden</button>
+    </div>
+  </div>
+</div>
+<script>
+  var _remForm = null;
+  function gbReminder(id, email, resend) {
+    _remForm = 'remForm-' + id;
+    document.getElementById('remTitle').textContent = resend ? 'Zahlungserinnerung erneut senden?' : 'Zahlungserinnerung senden?';
+    document.getElementById('remText').innerHTML = 'Es wird ' + (resend ? 'erneut ' : '') + 'eine Zahlungserinnerung per E-Mail an <strong>' + email + '</strong> gesendet.';
+    document.getElementById('remModal').classList.add('open');
+    document.body.classList.add('gb-noscroll');
+  }
+  function gbRemClose() {
+    document.getElementById('remModal').classList.remove('open');
+    document.body.classList.remove('gb-noscroll');
+  }
+  function gbRemConfirm() {
+    if (_remForm) { var f = document.getElementById(_remForm); if (f) f.submit(); }
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') gbRemClose(); });
+</script>
+
+<%- include('../partials/admin-footer') %>

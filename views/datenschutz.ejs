@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+<div class="page-head"><div class="wrap"><div class="crumb"><a href="/">Start</a> › Datenschutz</div><h1>Datenschutzerklärung</h1></div></div>
+<section class="block">
+  <div class="wrap narrow" style="line-height:1.75;color:#3b4149">
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">1. Verantwortliche Stelle</h2>
+    <p>Verantwortlich für die Datenverarbeitung ist die <strong><%= seller.name %></strong>, <%= seller.street %>, <%= seller.cityLine %><% if (seller.email) { %>, E-Mail: <%= seller.email %><% } %>. Weitere Angaben finden Sie im <a href="/impressum">Impressum</a>.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">2. Welche Daten wir verarbeiten</h2>
+    <p>Im Rahmen der Registrierung und Bestellung verarbeiten wir die von Ihnen angegebenen Daten: Anrede, Name, ggf. Firmenname und USt-IdNr., Anschrift, Telefonnummer, E-Mail-Adresse sowie Bestell- und Zahlungsdaten. Zur Betrugsprävention und Sicherheit speichern wir zudem technische Daten wie die <strong>IP-Adresse</strong> zum Zeitpunkt der Nutzung/Bestellung. Auch bei nicht angemeldeten Besuchern verarbeiten wir zur Sicherheit und für einen betrieblichen Live-Überblick vorübergehend technische Zugriffsdaten (IP-Adresse, Browser-/Geräte-Kennung sowie aufgerufene Seiten). Diese Gäste-Protokolle werden <strong>automatisch nach 3 Tagen gelöscht</strong>.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">3. Zwecke und Rechtsgrundlagen</h2>
+    <p>Die Verarbeitung erfolgt zur Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO), zur Erfüllung rechtlicher Pflichten (lit. c) sowie zur Wahrung berechtigter Interessen (lit. f), insbesondere zur Betrugsprävention und Absicherung des Shops (u. a. Speicherung der IP-Adresse).</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">4. Weitergabe von Daten</h2>
+    <p>Eine Weitergabe erfolgt nur, soweit dies zur Vertragsabwicklung erforderlich ist (z. B. an Versand-/Speditionsdienstleister) oder wir gesetzlich dazu verpflichtet sind.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">5. Speicherdauer</h2>
+    <p>Wir speichern personenbezogene Daten nur solange, wie es für die genannten Zwecke erforderlich ist bzw. gesetzliche Aufbewahrungsfristen (z. B. handels- und steuerrechtlich) dies vorschreiben.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">6. Ihre Rechte</h2>
+    <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch. Zudem besteht ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">7. Cookies</h2>
+    <p>Diese Website verwendet ausschlie&szlig;lich <strong>technisch notwendige Cookies</strong>, die f&uuml;r den Betrieb erforderlich sind (z.&nbsp;B. Anmeldung/Sitzung und Warenkorb). Es werden <strong>keine</strong> Tracking-, Analyse- oder Marketing-Cookies eingesetzt und keine Daten zu Werbezwecken an Dritte weitergegeben. F&uuml;r technisch notwendige Cookies ist nach &sect;&nbsp;25 Abs.&nbsp;2 TTDSG keine Einwilligung erforderlich. Ihre Theme-Einstellung (hell/dunkel) wird lokal in Ihrem Browser gespeichert.</p>
+
+    <h2 style="font-size:1.3rem;margin:22px 0 8px">8. Kontakt</h2>
+    <p>Bei Fragen zum Datenschutz erreichen Sie uns unter der im Impressum genannten Adresse.</p>
+
+    
+  </div>
+</section>
+<%- include('partials/footer') %>

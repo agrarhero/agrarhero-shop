@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+<section class="auth2">
+  <div class="wrap">
+    <div class="auth2-grid">
+
+      <aside class="auth2-aside">
+        <span class="a2-mark" aria-hidden="true"></span>
+        <span class="a2-eyebrow">Ihr Konto bei Agrarhero</span>
+        <h2>Willkommen zurück</h2>
+        <p>Melden Sie sich an und verwalten Sie Bestellungen, Rechnungen und Ihre Daten bequem an einem Ort.</p>
+        <ul class="a2-benefits">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Bestellungen &amp; Rechnungen jederzeit im Blick</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Schnellerer Checkout ohne erneute Eingabe</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Kauf auf Rechnung für Bestandskunden</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Ihr Warenkorb bleibt gespeichert</li>
+        </ul>
+        <div class="a2-trust">
+          <span>Deutschlandweite Lieferung</span>
+          <span>Persönliche Beratung</span>
+          <span>Faire Direktpreise</span>
+        </div>
+      </aside>
+
+      <div class="auth2-form">
+        <h1>Anmelden</h1>
+        <p class="a2-sub">Schön, dass Sie wieder da sind. Bitte geben Sie Ihre Zugangsdaten ein.</p>
+
+        <% if (error) { %><div class="flash error" style="margin:0 0 16px"><%= error %></div><% } %>
+        <% if (typeof unverified !== 'undefined' && unverified) { %>
+          <div style="background:#fff4e8;border:1px solid #f2d3b6;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:.92rem">
+            Ihr Konto ist noch nicht bestätigt. Bitte klicken Sie auf den Link in der Bestätigungs-E-Mail.
+            <form method="post" action="/bestaetigung-erneut" style="margin-top:10px">
+              <input type="hidden" name="email" value="<%= email %>">
+              <button class="btn btn-line btn-sm btn-block" type="submit">Bestätigungsmail erneut senden</button>
+            </form>
+          </div>
+        <% } %>
+
+        <form method="post" action="/login" data-validate>
+          <div class="field"><label>E-Mail</label><input type="email" name="email" value="<%= email %>" required autofocus></div>
+          <div class="field"><label>Passwort</label><input type="password" name="password" required></div>
+          <div style="text-align:right;margin-top:-4px;margin-bottom:16px"><a href="/passwort-vergessen" style="font-size:.85rem;color:var(--muted)">Passwort vergessen?</a></div>
+          <button class="btn btn-accent btn-block" type="submit">Anmelden ▸</button>
+        </form>
+
+        <div class="a2-sep">Noch kein Konto?</div>
+        <a class="btn btn-line btn-block a2-register" href="/registrieren">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6"/><path d="M17 14v6M20 17h-6"/></svg>
+          Kostenloses Konto erstellen
+        </a>
+        <p class="a2-note">In wenigen Sekunden erledigt. Nach der Bestätigung Ihrer E-Mail können Sie sofort bestellen, Ihr Warenkorb bleibt erhalten.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<%- include('partials/footer') %>

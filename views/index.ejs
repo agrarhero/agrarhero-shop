@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<section class="ah-hero">
+  <div class="wrap">
+    <span class="eyebrow">Ihr Fachhändler für Agrartechnik &amp; Hofbedarf</span>
+    <h1>Alles für Hof, Stall, Feld &amp; Forst</h1>
+    <p>Von Gülletechnik über Forsttechnik bis zu weiterem Agrarbedarf. Solide Technik und faire Preise, deutschlandweit geliefert. Unser Sortiment wächst laufend.</p>
+    <div class="ah-hero-cta">
+      <a class="btn btn-accent btn-lg" href="/produkte">Zum Sortiment ▸</a>
+      <% if (settings.promo_active) { %>
+      <span class="hero-ship">
+        <span class="hs-tag">Aktion</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7.5" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>
+        <span class="hs-txt"><b>Gratis Versand</b> deutschlandweit <span class="hs-date">· nur bis <%= settings.promo_end_date %></span></span>
+      </span>
+      <% } %>
+    </div>
+    <div class="hero-trust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Deutschlandweite Lieferung</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Kauf auf Rechnung</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Faire Direktpreise</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Persönliche Beratung</span>
+    </div>
+
+    <a class="hero-spende" href="#spende">
+      <span class="hsp-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7Z"/><path d="M12 22v-3"/></svg>
+        <span class="hsp-heart" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+      </span>
+      <span class="hsp-txt">
+        <b>Für die Natur: gemeinsam Bäume pflanzen</b>
+        <span>Wir unterstützen Deutschlands Wälder – mit einer Baumspende ans Bergwaldprojekt e.&nbsp;V. Erfahren Sie hier, wie Sie mitmachen.</span>
+      </span>
+      <span class="hsp-cta">Mehr erfahren <span class="ar">▾</span></span>
+    </a>
+  </div>
+</section>
+
+
+<% if (typeof products !== 'undefined' && products && products.length) { %>
+<section class="ah-showcase">
+  <div class="wrap">
+    <div class="sc-head">
+      <div>
+        <h2>Unsere Empfehlungen</h2>
+        <p class="sc-sub">Aus jeder Kategorie das gefragteste Modell.</p>
+      </div>
+      <a class="sc-all" href="/produkte">Alle Produkte <span class="ar">▸</span></a>
+    </div>
+    <div class="grid-products">
+      <% products.forEach(function(p){ %>
+        <div class="prod"><%- include('partials/product-tile', { p: p }) %></div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- Editorial: asymmetrisch -->
+<section class="ah2-about">
+  <div class="wrap">
+    <div>
+      <div class="k">Ihr Partner auf Augenhöhe</div>
+      <h2>Technik, die auf dem Hof wirklich zählt</h2>
+      <p>Als Fachhändler für Agrartechnik und Hofbedarf setzen wir auf robuste, ehrliche Ware statt auf leere Versprechen. Ob Gülletechnik, Forsttechnik oder weiterer Bedarf für Ihren Betrieb: Wir liefern verlässlich und beraten Sie persönlich.</p>
+      <p>Wir kaufen direkt ein und geben den Preisvorteil an Sie weiter. Kein Zwischenhandel, keine aufgeblähten Margen, dafür fairer Preis und deutschlandweite Lieferung.</p>
+    </div>
+    <div class="ah2-facts">
+      <div class="f"><div class="fi">€</div><div class="ft"><b>Faire Direktpreise</b><span>Ohne Zwischenhandelsmargen kalkuliert.</span></div></div>
+      <div class="f"><div class="fi">🚚</div><div class="ft"><b>Deutschlandweite Lieferung</b><span>Zuverlässig per Spedition, in 3–6 Werktagen.</span></div></div>
+      <div class="f"><div class="fi">✓</div><div class="ft"><b>Kauf auf Rechnung</b><span>Für Bestandskunden, ganz ohne Vorkasse.</span></div></div>
+      <div class="f"><div class="fi">☎</div><div class="ft"><b>Persönliche Beratung</b><span>Ehrlich und direkt, vor und nach dem Kauf.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Horizontale Zeitleiste (dunkel) -->
+<section class="ah2-flow" id="how">
+  <div class="wrap">
+    <div class="head"><div class="k">So einfach bestellen Sie</div><h2>In vier Schritten geliefert</h2></div>
+    <div class="ah2-line">
+      <div class="ah2-node"><div class="n">1</div><h4>Auswählen</h4><p>Artikel in den Warenkorb legen und unverbindlich bestellen.</p></div>
+      <div class="ah2-node"><div class="n">2</div><h4>Rechnung</h4><p>Sie erhalten die Rechnung mit allen Zahlungsdaten per E-Mail.</p></div>
+      <div class="ah2-node"><div class="n">3</div><h4>Zahlung</h4><p>Bequem per Überweisung, Zahlungsziel 14 Werktage.</p></div>
+      <div class="ah2-node"><div class="n">4</div><h4>Lieferung</h4><p>Nach Zahlungseingang per Spedition in 3–6 Werktagen.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA-Band -->
+<section class="ah2-cta">
+  <div class="wrap">
+    <div>
+      <h2>Sie suchen etwas Bestimmtes?</h2>
+      <p>Vieles beschaffen wir kurzfristig auf Anfrage. Sagen Sie uns, was Sie brauchen.</p>
+    </div>
+    <a class="btn" href="/kontakt">Kontakt aufnehmen ▸</a>
+  </div>
+</section>
+
+<!-- Spenden-/Natur-Block -->
+<section class="ah-sec spende-anchor" id="spende" style="padding:20px 0 10px">
+  <div class="wrap" style="max-width:1100px"><%- include('partials/spende') %></div>
+</section>
+
+<!-- FAQ offen, zweispaltig -->
+<section class="ah2-faq" id="faq">
+  <div class="wrap">
+    <div class="head" style="text-align:center;margin-bottom:36px"><div class="k" style="color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:.8rem">Gut zu wissen</div><h2 style="font-size:2rem;margin-top:8px">Häufige Fragen</h2></div>
+    <div class="ah2-faq-grid">
+      <div class="ah2-qa"><h4><span class="q">F</span> Wie kann ich bezahlen?</h4><p>Neukunden zahlen zunächst per Vorkasse (Banküberweisung). Als Bestandskunde bestellen Sie bequem auf Rechnung, ohne Vorkasse.</p></div>
+      <div class="ah2-qa"><h4><span class="q">F</span> Wie lange dauert die Lieferung?</h4><p>Nach Zahlungseingang in der Regel innerhalb von 3–6 Werktagen, deutschlandweit per Spedition.</p></div>
+      <div class="ah2-qa"><h4><span class="q">F</span> Wie erfolgt die Anlieferung?</h4><p>Per Spedition. Sie werden vorab avisiert, damit jemand vor Ort ist. Bitte für eine anfahrbare Abladestelle sorgen.</p></div>
+      <div class="ah2-qa"><h4><span class="q">F</span> Wie hoch ist das Zahlungsziel?</h4><p>Das Zahlungsziel beträgt 14 Werktage ab Rechnungsdatum.</p></div>
+      <div class="ah2-qa"><h4><span class="q">F</span> Bieten Sie auch andere Agrartechnik an?</h4><p>Ja, unser Sortiment wächst laufend. Suchen Sie etwas, das noch nicht gelistet ist, fragen Sie uns gern an.</p></div>
+      <div class="ah2-qa"><h4><span class="q">F</span> Liefern Sie auch ins Ausland?</h4><p>Standardmäßig innerhalb Deutschlands. Für das benachbarte Ausland kontaktieren Sie uns bitte vorab.</p></div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

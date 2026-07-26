@@ -1,0 +1,129 @@
+<%- include('../partials/admin-header') %>
+<div style="margin-bottom:18px">
+  <h1 style="font-size:2rem">Einstellungen</h1>
+  <p style="color:var(--muted);font-size:.92rem">Alle Aktions- und Banner-Texte ohne Code anpassen. Zu jedem Feld steht, <b>wo im Shop</b> es erscheint. <code>{DATUM}</code> wird überall automatisch durch das Enddatum ersetzt. Grau hinterlegte Felder sind gerade ausgeschaltet und werden nicht angezeigt.</p>
+</div>
+
+<form method="post" action="/admin/einstellungen" id="settingsForm">
+
+  <!-- 1 · VERKAUFSAKTION -->
+  <div class="panel pe-card" style="max-width:860px">
+    <h3>1 · Verkaufsaktion, Aktion &amp; Versand</h3>
+    <div class="help-box"><strong>Ein Schalter steuert die ganze Aktion.</strong> Aktion AN = Aktion-Modus mit kostenlosem Versand und allen Aktions-Hinweisen. Aktion AUS = normaler Betrieb mit Versandkosten und ohne Aktions-Hinweise. Die genauen Auswirkungen stehen direkt am Schalter.</div>
+    <div class="chk-detail" style="margin-bottom:14px">
+      <label class="chk"><input type="checkbox" name="promo_active" id="cbPromo" <%= cfg.promo_active === '1' ? 'checked' : '' %>><span>Aktion / Aktion aktiv</span></label>
+      <div class="chk-info">
+        Ein <b>einziger Master-Schalter</b> für die gesamte Verkaufsaktion:<br>
+        <span class="ci-on">AN</span> <b>Kostenloser Versand</b> (an der Kasse 0 €) · grüne „✓ Kostenloser Versand"-Hinweise auf Produkten · <b>rote „AKTION"-Badges</b> auf den Bildern · Info-Leiste oben, Hero-Kasten und Aktion-Laufbanner mit deinen Aktionstexten.<br>
+        <span class="ci-off">AUS</span> Alles davon verschwindet: <b>der Versand wird dann automatisch berechnet</b> (fairer Speditionspreis: Grundpreis + Aufpreis je Artikel, unten einstellbar), keine AKTION-Badges, keine „Kostenloser Versand"-Hinweise, kein Aktions-Text (die Info-Leiste zeigt einen neutralen Standardtext). Das <b>Mitarbeiter-Banner läuft unabhängig weiter</b>; die Produktpreise selbst ändern sich nicht.
+      </div>
+    </div>
+
+    <label class="fld"><span>Aktions-Enddatum (z. B. 14.08.2026)</span><input name="promo_end_date" value="<%= cfg.promo_end_date %>"></label>
+    <p class="hint"><b>Wo?</b> Dieses Datum ersetzt den Platzhalter <code>{DATUM}</code> in den <b>Aktions-Texten</b> (Info-Leiste, Hero, Aktion-Banner) – Sie ändern es also nur hier, einmal. <b>Nicht</b> für den Job-Text: der Mitarbeiter-gesucht-Text hat sein <b>eigenes Datum</b>, das Sie unten direkt in den Satz eintippen (z. B. „…ab 01.08.2026").</p>
+
+    <div class="grid2" style="max-width:520px">
+      <label class="fld"><span>Versand-Grundpreis je Bestellung (Spedition-Basis, € netto)</span><input name="shipping_base" value="<%= (Number(cfg.ship_base_cents||0)/100).toFixed(2).replace('.',',') %>" inputmode="decimal" placeholder="69,00"></label>
+      <label class="fld"><span>Aufpreis je Artikel (€ netto)</span><input name="shipping_perbox" value="<%= (Number(cfg.ship_perbox_cents||0)/100).toFixed(2).replace('.',',') %>" inputmode="decimal" placeholder="14,00"></label>
+    </div>
+    <p class="hint"><b>Wie wird gerechnet?</b> Gilt nur, <b>solange die Aktion oben AUS ist</b>. Speditions-Modell: <b>Grundpreis</b> (deckt Anfahrt, deutschlandweit kalkuliert) <b>+ Aufpreis je Artikel</b>. Der Betrag erscheint im Warenkorb, an der Kasse, auf der Rechnung und in der Bestätigungs-Mail (zzgl. MwSt.). Bei aktiver Aktion ist der Versand kostenlos.</p>
+
+    <div class="fldwrap" data-off="promo">
+      <label class="fld"><span>Text: Info-Leiste ganz oben</span><input name="topbar_text" value="<%= cfg.topbar_text %>"></label>
+      <p class="hint"><b>Wo?</b> Im schmalen dunklen Streifen ganz oben auf <b>jeder</b> Shop-Seite.</p>
+    </div>
+
+    <div class="fldwrap" data-off="promo">
+      <label class="fld"><span>Text: Startseite Hero-Aktion</span><textarea name="hero_promo" rows="2"><%= cfg.hero_promo %></textarea></label>
+      <p class="hint"><b>Wo?</b> Im großen orangefarbenen Aktions-Kasten oben auf der <b>Startseite</b>.</p>
+    </div>
+  </div>
+
+  <!-- 2 · LAUFENDER BANNER -->
+  <div class="panel pe-card" style="max-width:860px">
+    <h3>2 · Laufender Banner (oben durchlaufend)</h3>
+    <div class="help-box">
+      <strong>So funktioniert's:</strong> Direkt unter der Kopfzeile läuft auf jeder Seite ein Banner. Darin können <b>zwei</b> Texte laufen:
+      <ul style="margin:8px 0 0 18px">
+        <li><b>Beide</b> Schalter an → die Texte <b>wechseln sich ab</b> (dann zählt die Anzeigedauer ganz unten).</li>
+        <li><b>Nur einer</b> an → nur dieser Text läuft (kein Wechsel).</li>
+        <li><b>Beide</b> aus → es erscheint <b>kein</b> Laufbanner.</li>
+      </ul>
+    </div>
+
+    <!-- Aktion-Text im Laufbanner -->
+    <div class="switch-row">
+      <label class="switch"><input type="checkbox" name="banner_promo_active" id="cbBPromo" <%= cfg.banner_promo_active === '1' ? 'checked' : '' %>><span class="sw-track"></span></label>
+      <div class="switch-lbl"><b>Aktion-Text anzeigen</b><span>Läuft nur, wenn oben zusätzlich „Aktion aktiv" eingeschaltet ist.</span></div>
+    </div>
+    <div class="fldwrap" data-off="bpromo">
+      <label class="fld"><span>Text: Aktion im Laufbanner</span><textarea name="banner_promo" rows="2"><%= cfg.banner_promo %></textarea></label>
+      <p class="hint"><b>Wo?</b> Im durchlaufenden Banner direkt unter der Kopfzeile (auf jeder Seite).</p>
+    </div>
+
+    <!-- Mitarbeiter/Job-Text -->
+    <div class="switch-row" style="margin-top:8px">
+      <label class="switch"><input type="checkbox" name="banner_job_active" id="cbBJob" <%= cfg.banner_job_active === '1' ? 'checked' : '' %>><span class="sw-track"></span></label>
+      <div class="switch-lbl"><b>Mitarbeiter-gesucht-Text anzeigen</b><span>Läuft unabhängig von der Verkaufsaktion – z. B. für offene Stellen.</span></div>
+    </div>
+    <div class="fldwrap" data-off="bjob">
+      <label class="fld"><span>Text: Mitarbeiter gesucht (Job)</span><textarea name="banner_job" rows="2"><%= cfg.banner_job %></textarea></label>
+      <p class="hint"><b>Wo?</b> Im selben durchlaufenden Banner. Ein <b>Klick</b> darauf führt den Besucher zur <b>Karriere-Seite</b> („Jetzt direkt bewerben"). <b>Datum:</b> Ein evtl. Datum (z. B. Eintrittstermin) tippen Sie hier direkt in den Satz – es ist <b>unabhängig</b> vom Aktions-Enddatum oben.</p>
+    </div>
+
+    <!-- Anzeigedauer -->
+    <div class="fldwrap" data-off="seconds">
+      <div class="range-card" style="margin-top:14px">
+        <div class="range-head">
+          <span><b>Anzeigedauer je Text</b><br><span class="hint" style="margin:0">Nur relevant, wenn <b>beide</b> Texte laufen – legt fest, nach wie vielen Sekunden gewechselt wird.</span></span>
+          <span class="range-val"><span id="secVal"><%= cfg.banner_seconds %></span> Sek.</span>
+        </div>
+        <input type="range" min="1" max="20" step="1" name="banner_seconds" value="<%= cfg.banner_seconds %>" id="secRange">
+        <div class="range-scale"><span>1 Sek.</span><span>schneller &#10229; &#10230; langsamer</span><span>20 Sek.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 · SICHERHEIT -->
+  <div class="panel pe-card" style="max-width:860px">
+    <h3>3 · Sicherheit · Fake-/Troll-Schutz</h3>
+    <div class="help-box"><strong>So füllst du die Liste aus:</strong>
+      <ul style="margin:8px 0 0;padding-left:18px;line-height:1.7">
+        <li>Es reicht der <strong>Name-Teil</strong> der Domain – z.&nbsp;B. <code>auktionshilfe</code> erkennt automatisch <code>auktionshilfe.info</code>, <code>www.auktionshilfe.de</code> usw. Die vollständige Domain (<code>auktionshilfe.info</code>) geht aber genauso.</li>
+        <li><strong>Kein</strong> <code>https://</code> und <strong>kein</strong> <code>www.</code> nötig. Groß-/Kleinschreibung ist egal.</li>
+        <li><strong>Mehrere Domains</strong> mit <strong>Komma</strong> trennen – mit oder ohne Leerzeichen dahinter, beides funktioniert:<br><code>auktionshilfe, betrug-forum.de</code> &nbsp;oder&nbsp; <code>auktionshilfe,betrug-forum.de</code></li>
+      </ul>
+      <p style="margin:10px 0 0">Kommt ein Kunde über eine dieser Seiten, wird er im Sicherheits-Check <strong>rot</strong> markiert und der Score sinkt.</p>
+      <p style="margin:8px 0 0"><strong>Wichtig:</strong> Von welcher Seite ein Kunde <em>allgemein</em> kam (z.&nbsp;B. Kleinanzeigen), siehst du immer im Kundenprofil unter <strong>„Kam über"</strong> – das ist reine Info und wirkt sich <strong>nicht</strong> auf den Score aus. Nur die hier eingetragenen Domains verschlechtern die Bewertung.</p></div>
+    <label class="fld"><span>Beobachtete Herkunfts-Domains (kommagetrennt)</span><input name="fraud_watch_domains" value="<%= cfg.fraud_watch_domains || '' %>" placeholder="auktionshilfe, beispiel.de"></label>
+  </div>
+
+  <div class="pe-actions" style="max-width:860px"><button class="btn btn-accent" type="submit">Einstellungen speichern</button></div>
+</form>
+
+<script>
+(function () {
+  var f = document.getElementById('settingsForm');
+  if (!f) return;
+  var cbPromo = document.getElementById('cbPromo');
+  var cbBPromo = document.getElementById('cbBPromo');
+  var cbBJob = document.getElementById('cbBJob');
+  var secVal = document.getElementById('secVal');
+  var secRange = document.getElementById('secRange');
+  function setOff(name, off) {
+    f.querySelectorAll('.fldwrap[data-off="' + name + '"]').forEach(function (el) { el.classList.toggle('fld-off', off); });
+  }
+  function apply() {
+    var promo = cbPromo.checked, bp = cbBPromo.checked, bj = cbBJob.checked;
+    var lager = promo && bp;
+    setOff('promo', !promo);
+    setOff('bpromo', !lager);
+    setOff('bjob', !bj);
+    setOff('seconds', !(lager && bj));
+  }
+  [cbPromo, cbBPromo, cbBJob].forEach(function (c) { if (c) c.addEventListener('change', apply); });
+  if (secRange) secRange.addEventListener('input', function () { secVal.textContent = this.value; });
+  apply();
+})();
+</script>
+<%- include('../partials/admin-footer') %>

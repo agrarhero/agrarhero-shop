@@ -1,0 +1,79 @@
+<%- include('../partials/header') %>
+<div class="page-head"><div class="wrap"><div class="crumb"><a href="/konto">Mein Konto</a> › Meine Daten</div><h1>Meine Daten</h1></div></div>
+<section class="block">
+  <div class="wrap">
+    <div class="acct-layout">
+      <%- include('../partials/account-nav') %>
+      <div class="acct-content">
+        <div class="form-card">
+          <% if (saved) { %><div class="flash success" style="margin:0 0 16px">Ihre Daten wurden gespeichert.</div><% } %>
+          <form method="post" action="/konto/daten" data-validate>
+            <% if (user.customer_type === 'firma' || user.company) { %>
+              <div class="section-title" style="margin-top:0">Firma</div>
+              <div class="grid2">
+                <div class="field"><label>Firmenname</label><input name="company" value="<%= user.company || '' %>"></div>
+                <div class="field"><label>USt-IdNr. (optional)</label><input name="ustid" value="<%= user.ustid || '' %>"></div>
+              </div>
+            <% } else { %>
+              <input type="hidden" name="company" value=""><input type="hidden" name="ustid" value="">
+            <% } %>
+            <div class="section-title" style="<%= (user.customer_type==='firma'||user.company)?'':'margin-top:0' %>">Ansprechpartner</div>
+            <div class="grid3">
+              <div class="field"><label>Anrede</label>
+                <select name="salutation">
+                  <% var s=user.salutation||''; %>
+                  <option value="" <%= !s?'selected':'' %>>—</option>
+                  <option value="Herr" <%= s==='Herr'?'selected':'' %>>Herr</option>
+                  <option value="Frau" <%= s==='Frau'?'selected':'' %>>Frau</option>
+                  <option value="Divers" <%= s==='Divers'?'selected':'' %>>Divers</option>
+                </select>
+              </div>
+              <div class="field"><label>Vorname</label><input name="first_name" value="<%= user.first_name || '' %>"></div>
+              <div class="field"><label>Nachname</label><input name="last_name" value="<%= user.last_name || '' %>"></div>
+            </div>
+            <div class="section-title">Anschrift</div>
+            <div class="field"><label>Straße & Nr.</label><input name="street" value="<%= user.street || '' %>"></div>
+            <div class="grid3">
+              <div class="field"><label>PLZ</label><input name="zip" value="<%= user.zip || '' %>"></div>
+              <div class="field"><label>Ort</label><input name="city" value="<%= user.city || '' %>"></div>
+              <div class="field"><label>Land</label><input name="country" value="<%= user.country || 'Deutschland' %>"></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label>Telefon</label><input name="phone" value="<%= user.phone || '' %>"></div>
+              <div class="field"><label>E-Mail (nicht änderbar)</label><input value="<%= user.email %>" disabled style="background:#f5f6f8;color:var(--muted)"></div>
+            </div>
+            <div class="section-title">Lieferadresse</div>
+            <label class="checkline" style="margin-bottom:2px">
+              <input type="checkbox" name="ship_diff" id="dataShipDiff" value="ja" <%= user.ship_street ? 'checked' : '' %>>
+              <span>Abweichende Lieferadresse verwenden (sonst wird an die Rechnungsadresse geliefert).</span>
+            </label>
+            <div id="dataShipFields" class="ship-fields">
+              <p class="form-note" style="margin:0 0 8px">Empfängername ist optional – bleibt das Feld leer, liefern wir an den bereits oben angegebenen Namen (bei Firmenkunden an Firma und Ansprechpartner).</p>
+              <div class="grid2">
+                <div class="field"><label>Vorname Empfänger (optional)</label><input name="ship_first_name" value="<%= user.ship_first_name || '' %>"></div>
+                <div class="field"><label>Nachname Empfänger (optional)</label><input name="ship_last_name" value="<%= user.ship_last_name || '' %>"></div>
+              </div>
+              <div class="field"><label>Firma (optional)</label><input name="ship_company" value="<%= user.ship_company || '' %>"></div>
+              <div class="field"><label>Straße & Hausnummer</label><input name="ship_street" value="<%= user.ship_street || '' %>"></div>
+              <div class="grid3">
+                <div class="field"><label>PLZ</label><input name="ship_zip" value="<%= user.ship_zip || '' %>"></div>
+                <div class="field"><label>Ort</label><input name="ship_city" value="<%= user.ship_city || '' %>"></div>
+                <div class="field"><label>Land</label><input name="ship_country" value="<%= user.ship_country || 'Deutschland' %>"></div>
+              </div>
+            </div>
+            <button class="btn btn-accent btn-block" type="submit">Speichern</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var cb=document.getElementById('dataShipDiff'), box=document.getElementById('dataShipFields');
+  if(!cb||!box) return;
+  function apply(){ box.style.display=cb.checked?'':'none'; }
+  cb.addEventListener('change',apply); apply();
+})();
+</script>
+<%- include('../partials/footer') %>

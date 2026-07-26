@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+<%
+  var pageLabel = h.groupLabel(gruppe);
+  var headSub = gruppe==='guellefass' ? 'Güllefässer, Pumptankwagen und Wasserfasswagen für Hof, Feld und Kommune. Robuste Technik zum fairen Preis.'
+    : gruppe==='seilwinde' ? 'Forstseilwinden, mechanisch und hydraulisch, mit Funksteuerung, für den professionellen Einsatz.'
+    : gruppe==='saege' ? 'Motor- und Kettensägen für Forst und Hof. Profi-Technik zum fairen Preis, deutschlandweit geliefert.'
+    : gruppe==='erntebox' ? 'Ernteboxen und Großkisten für Obst, Gemüse und Lagerung. Robust, stapelbar und langlebig.'
+    : 'Güllefässer, Seilwinden, Sägen, Ernteboxen und mehr, direkt vom Fachhändler und deutschlandweit geliefert.';
+%>
+<%
+  var _catIcons = {
+    guellefass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="15" height="7" rx="3.5"/><path d="M17.5 9.5H20l1.5 3V15h-4"/><circle cx="7.5" cy="18" r="1.7"/><circle cx="16" cy="18" r="1.7"/></svg>',
+    seilwinde:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="5"/><path d="M8 9.2v5.6M13 12h5.5M18.5 12v4a2 2 0 0 1-2 2"/></svg>',
+    saege:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8.5" width="8" height="6.5" rx="2"/><path d="M10.5 9.5H20l1 2-1 1.5h-9.5"/><path d="M13 13.5v1.6M16 13.5v1.6M19 13.5v1.6"/></svg>',
+    erntebox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16l-1.4 11.5H5.4z"/><path d="M9 7.5v11M15 7.5v11M4 11.5h16"/></svg>'
+  };
+  var _catIcon = _catIcons[gruppe] || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg>';
+%>
+<section class="cat-hero">
+  <span class="ch-deco" aria-hidden="true"></span>
+  <div class="wrap">
+    <div class="crumb"><a href="/">Start</a> › <span><%= pageLabel %></span></div>
+    <div class="cat-hero-in">
+      <span class="cat-ic" aria-hidden="true"><%- _catIcon %></span>
+      <div class="ch-txt">
+        <h1><%= pageLabel %></h1>
+        <p><%= headSub %></p>
+      </div>
+    </div>
+    <div class="cat-hero-stats">
+      <span class="chs-count"><b><%= products.length %></b> Artikel</span>
+      <span>Neuware direkt vom Fachhändler</span>
+      <% if (typeof settings !== 'undefined' && settings.promo_active) { %><span class="is-promo">Kostenloser Versand · Aktion</span><% } %>
+      <span>Deutschlandweite Lieferung</span>
+    </div>
+  </div>
+</section>
+<section class="block">
+  <div class="wrap">
+    <div class="cat-bar">
+      <div class="cat-filters">
+        <a class="chip <%= !gruppe ? 'active':'' %>" href="/produkte">Alle</a>
+        <a class="chip <%= gruppe==='guellefass' ? 'active':'' %>" href="/produkte?gruppe=guellefass">Güllefässer / Wasserwagen</a>
+        <a class="chip <%= gruppe==='seilwinde' ? 'active':'' %>" href="/produkte?gruppe=seilwinde">Seilwinden</a>
+        <a class="chip <%= gruppe==='saege' ? 'active':'' %>" href="/produkte?gruppe=saege">Sägen</a>
+        <a class="chip <%= gruppe==='erntebox' ? 'active':'' %>" href="/produkte?gruppe=erntebox">Ernteboxen</a>
+      </div>
+      <label class="sortsel">Sortierung
+        <select id="sortSel">
+          <option value="pop">Beliebtheit</option>
+          <option value="price-asc">Preis: aufsteigend</option>
+          <option value="price-desc">Preis: absteigend</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </label>
+    </div>
+    <% if (products.length === 0) { %>
+      <div class="empty"><p>In dieser Kategorie sind derzeit keine Produkte vorhanden.</p></div>
+    <% } else { %>
+      <div class="grid-products" id="grid">
+        <% products.forEach(function(p, idx){ %>
+          <div class="prod" data-idx="<%= idx %>" data-price="<%= p.price_cents %>" data-name="<%= (p.name||'').toLowerCase().replace(/\"/g,'') %>" data-bs="<%= p.bestseller ? 1 : 0 %>">
+            <%- include('partials/product-tile', { p: p }) %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+<script>
+(function(){
+  var grid = document.getElementById('grid'); if(!grid) return;
+  var prods = Array.prototype.slice.call(grid.querySelectorAll('.prod'));
+  var sortSel = document.getElementById('sortSel'); if(!sortSel) return;
+  function apply(){
+    var mode = sortSel.value;
+    var sorted = prods.slice().sort(function(a,b){
+      if(mode==='price-asc')  return (+a.dataset.price)-(+b.dataset.price);
+      if(mode==='price-desc') return (+b.dataset.price)-(+a.dataset.price);
+      if(mode==='name')       return a.dataset.name.localeCompare(b.dataset.name,'de');
+      var bs=(+b.dataset.bs)-(+a.dataset.bs); return bs!==0?bs:(+a.dataset.idx)-(+b.dataset.idx);
+    });
+    sorted.forEach(function(p){ grid.appendChild(p); });
+  }
+  sortSel.addEventListener('change', apply);
+  apply();
+})();
+</script>
+<%- include('partials/footer') %>

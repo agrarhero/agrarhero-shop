@@ -1,0 +1,236 @@
+<%- include('../partials/admin-header') %>
+<% var col = stat.color(order.status); %>
+
+<div style="margin-bottom:8px"><a href="/admin" style="color:var(--muted);font-size:.88rem">‹ Zurück zur Übersicht</a></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 style="font-size:2rem">Bestellung <%= order.order_number %></h1>
+    <p style="color:var(--muted);font-size:.9rem">Eingegangen am <%= h.dateTimeDE(order.created_at) %> · Kunden-Nr. <%= order.user_id %>
+      <% if (order.invoice_sent_at){ %> · <span style="color:var(--green);font-weight:600">Rechnung gesendet am <%= h.dateTimeDE(order.invoice_sent_at) %></span><% } %>
+    </p>
+  </div>
+  <span class="badge b-<%= col || 'grey' %>" style="font-size:.85rem"><%= stat.label(order.status) %></span>
+</div>
+
+<div class="admin-grid">
+
+  <!-- LINKS -->
+  <div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="phead"><h2>Datenprüfung</h2>
+        <% var allOk = checks.every(function(c){return c.ok}); %>
+        <span class="badge <%= allOk ? 'b-green':'b-red' %>"><%= allOk ? 'Alle Angaben vollständig' : 'Bitte prüfen' %></span>
+      </div>
+      <div style="padding:8px 20px 16px">
+        <% checks.forEach(function(c){ %>
+          <div class="check"><span class="ico <%= c.ok ? 'ok':'bad' %>"><%= c.ok ? '✓' : '!' %></span><span class="lbl"><%= c.label %></span><span class="val"><%= c.value %></span></div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px">
+      <div class="phead"><h2>Kundendaten & Herkunft</h2></div>
+      <div style="padding:16px 20px;font-size:.92rem;line-height:1.8">
+        <strong><%= (order.cust_first_name||'')+' '+(order.cust_last_name||'') %></strong><br>
+        <span class="badge <%= order.cust_customer_type==='privat'?'b-grey':'b-blue' %>" style="font-size:.66rem"><%= order.cust_customer_type==='privat'?'Privatkunde':'Firmenkunde' %></span>
+        <% if (order.cust_customer_type==='firma' && order.cust_ustid){ %> <span style="color:var(--muted);font-size:.8rem">USt-IdNr.: <%= order.cust_ustid %></span><% } %><br>
+        <% if (order.cust_company){ %><%= order.cust_company %><br><% } %>
+        <%= order.cust_street || '—' %><br>
+        <%= (order.cust_zip||'')+' '+(order.cust_city||'') %><br>
+        <%= order.cust_country || '' %><br>
+        <span style="color:var(--muted)">E-Mail:</span> <%= order.cust_email %><br>
+        <span style="color:var(--muted)">Telefon:</span> <%= order.cust_phone || '—' %>
+        <% if (order.customer_note){ %><br><span style="color:var(--muted)">Anmerkung:</span> <em><%= order.customer_note %></em><% } %>
+        <% var oship = h.orderShipping(order); if (oship.different) { %>
+          <div style="margin-top:12px;padding:10px 12px;background:#fff4e8;border:1px solid #f2d3b6;border-radius:6px;color:#5b3a12">
+            <span style="color:#8a4b12;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em">⚑ Abweichende Lieferadresse</span><br>
+            <% if (oship.company){ %><strong><%= oship.company %></strong><br><% } %>
+            <%= (oship.first_name+' '+oship.last_name).trim() %><br>
+            <%= oship.street %><br><%= (oship.zip+' '+oship.city).trim() %><br><%= oship.country %>
+          </div>
+        <% } %>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+          <span style="color:var(--muted)">Herkunft (IP):</span>
+          <% if (order.ip) { %>
+            <span style="font-size:1.05rem"><%= geo.flag(order.geo_country_code) || '🏳️' %></span>
+            <strong><%= order.geo_country || (geo.isPrivate(order.ip) ? 'Lokal / privat' : '—') %></strong>
+            <% if (order.geo_region) { %> · <%= order.geo_region %><% } %><br>
+            <span style="font-family:monospace;color:var(--muted)"><%= order.ip %></span>
+          <% } else { %> <span style="color:var(--muted)">— (keine IP gespeichert)</span><% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h2>Positionen</h2></div>
+      <table class="tbl">
+        <thead><tr><th>Artikel</th><th class="c">Menge</th><th class="r">Einzel (netto)</th><th class="r">Summe</th></tr></thead>
+        <tbody>
+          <% order.items.forEach(function(it){ %>
+            <tr><td><%= it.name %><div style="font-size:.8rem;color:var(--muted)"><%= it.type %></div></td>
+            <td class="c"><%= it.quantity %></td><td class="r"><%= h.euro(it.unit_cents) %></td><td class="r"><%= h.euro(it.unit_cents*it.quantity) %></td></tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div style="padding:14px 20px;border-top:1px solid var(--line)">
+        <div class="summary" style="border:none;background:none;padding:0">
+          <div class="line"><span>Zwischensumme (netto)</span><span><%= h.euro(order.totals.subtotal) %></span></div>
+          <div class="line"><span>Versand</span><span><% if (order.totals.shipping > 0) { %><%= h.euro(order.totals.shipping) %><% } else { %><span class="ship-free">kostenlos</span><% } %></span></div>
+          <div class="line"><span>zzgl. <%= order.totals.taxRate %> % MwSt.</span><span><%= h.euro(order.totals.tax) %></span></div>
+          <div class="line total"><span>Rechnungsbetrag</span><span><%= h.euro(order.totals.gross) %></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECHTS -->
+  <div>
+    <!-- Rechnung -->
+    <form method="post" action="/admin/bestellung/<%= order.id %>/speichern" id="invForm">
+      <div class="panel">
+        <div class="phead"><h2>Rechnung</h2></div>
+        <div style="padding:18px 20px">
+          <div class="section-title" style="margin-top:0">Rechnungs-Eckdaten</div>
+          <div class="grid2">
+            <div class="field"><label>Rechnungs-Nr.</label><input name="invoice_number" value="<%= order.invoice_number || '' %>"></div>
+            <div class="field"><label>Rechnungsdatum</label><input type="date" name="invoice_date" value="<%= order.invoice_date || '' %>"></div>
+          </div>
+          <div class="grid3">
+            <div class="field"><label>MwSt. %</label><input name="tax_rate" value="<%= order.tax_rate %>"></div>
+            <div class="field"><label>Zahlungsziel (WT)</label><input name="payment_days" value="<%= order.payment_days || '14' %>"></div>
+            <div class="field"><label>Lieferung (WT)</label><input name="delivery_days" value="<%= order.delivery_days || '3-6' %>"></div>
+          </div>
+          <div class="section-title">Absender / Zahlungsempfänger</div>
+          <div class="field"><label>Firma / Name</label><input name="seller_name" value="<%= order.seller_name || '' %>"></div>
+          <div class="field"><label>Anschrift</label><input name="seller_address" value="<%= order.seller_address || '' %>"></div>
+          <div class="grid2">
+            <div class="field"><label>E-Mail</label><input name="seller_email" value="<%= order.seller_email || '' %>"></div>
+            <div class="field"><label>Telefon</label><input name="seller_phone" value="<%= order.seller_phone || '' %>"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Steuernummer</label><input name="seller_taxnumber" value="<%= order.seller_taxnumber || '' %>"></div>
+            <div class="field"><label>USt-IdNr.</label><input name="seller_ustid" value="<%= order.seller_ustid || '' %>"></div>
+          </div>
+          <div class="form-note" style="margin-top:-6px"><strong>Pflicht:</strong> eine von beiden muss auf der Rechnung stehen – Steuernummer <em>oder</em> USt-IdNr.</div>
+          <label class="chk" style="margin-top:8px"><input type="checkbox" name="seller_taxnumber_remember" value="ja" <%= (typeof taxRemembered !== 'undefined' && taxRemembered) ? 'checked' : '' %>><span>Steuernummer als <strong>Standard merken</strong> – wird dann bei jeder Bestellung vorausgefüllt. Häkchen entfernen + speichern/Rechnung senden → Standard wird überall entfernt.</span></label>
+          <div class="section-title">Bankverbindung</div>
+          <div class="field"><label>Kontoinhaber / Empfänger *</label><input name="seller_account_holder" value="<%= order.seller_account_holder || '' %>" placeholder="Empfänger der Überweisung – manuell eintragen"><div class="form-note">Erscheint als „Kontoinhaber" auf der Rechnung. Wird NICHT automatisch aus dem Firmennamen übernommen.</div></div>
+          <div class="field"><label>IBAN</label><input name="seller_iban" value="<%= order.seller_iban || '' %>"></div>
+          <div class="grid2">
+            <div class="field"><label>BIC</label><input name="seller_bic" value="<%= order.seller_bic || '' %>"></div>
+            <div class="field"><label>Bank</label><input name="seller_bank" value="<%= order.seller_bank || '' %>"></div>
+          </div>
+          <div class="section-title">Weiteres</div>
+          <div class="field"><label>Hinweis auf der Rechnung (optional)</label><textarea name="invoice_note" rows="2"><%= order.invoice_note || '' %></textarea></div>
+          <div class="field"><label>Interne Notiz (nur für Sie)</label><textarea name="admin_note" rows="2"><%= order.admin_note || '' %></textarea></div>
+        </div>
+        <div class="sticky-actions">
+          <a class="btn btn-line" href="/admin/bestellung/<%= order.id %>/rechnung.pdf" target="_blank">Rechnung als PDF ansehen</a>
+          <button class="btn btn-dark" type="submit">Daten speichern</button>
+          <% if (order.status === 'neu' || order.status === 'geoeffnet') { %>
+            <button class="btn btn-accent" type="button" onclick="gbOpen('sendModal')">Rechnung rausschicken ▸</button>
+          <% } %>
+        </div>
+      </div>
+    </form>
+
+    <!-- Workflow (nächster Schritt) -->
+    <div class="panel" style="margin-top:20px">
+      <div class="phead"><h2>Ablauf</h2><span class="badge b-<%= col || 'grey' %>"><%= stat.label(order.status) %></span></div>
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <% if (order.status === 'berechnet') { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">Rechnung wurde versendet. Sobald der Zahlungseingang bestätigt ist:</p>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/bezahlt"><button class="btn btn-block" style="background:var(--green);color:#fff">Als „Bezahlt" markieren</button></form>
+        <% } else if (order.status === 'bezahlt') { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">Zahlung erhalten. Versand vorbereiten und Kunde informieren:</p>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/versand"><button class="btn btn-block" style="background:#e5661f;color:#fff">„Versand" – Kunde benachrichtigen ▸</button></form>
+        <% } else if (order.status === 'versand') { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">In Versandvorbereitung. Jetzt versenden – oder Verzögerung melden:</p>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/versendet"><button class="btn btn-block" style="background:#c9a21a;color:#fff">„Versendet" – Versandbestätigung senden ▸</button></form>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/versand-verspaetung"><button class="btn btn-block" style="background:#7a5230;color:#fff">„Versand Verspätung" – Info senden</button></form>
+        <% } else if (order.status === 'versand_verspaetung') { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">Verspätung wurde dem Kunden mitgeteilt. Wenn versandt:</p>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/versendet"><button class="btn btn-block" style="background:#c9a21a;color:#fff">„Versendet" – Versandbestätigung senden ▸</button></form>
+        <% } else if (order.status === 'versendet') { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">Versendet. Sobald die Sendung beim Kunden angekommen ist – nur für die Kundenansicht, es wird <strong>keine E-Mail</strong> gesendet:</p>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/zugestellt"><button class="btn btn-block" style="background:var(--green);color:#fff">„Zugestellt“ markieren (ohne E-Mail)</button></form>
+        <% } else if (order.status === 'zugestellt') { %>
+          <p style="color:var(--green);font-weight:600;margin:0">✓ Abgeschlossen – Bestellung wurde zugestellt.</p>
+        <% } else if (order.status === 'ignoriert') { %>
+          <p style="color:var(--red);font-weight:600;margin:0">Diese Bestellung ist als „ignoriert" markiert.</p>
+        <% } else { %>
+          <p style="color:var(--muted);font-size:.9rem;margin:0">Nächster Schritt: Rechnungsdaten prüfen und oben auf „Rechnung rausschicken" klicken.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Moderation -->
+    <div class="panel" style="margin-top:20px;border-color:#f0d9d2">
+      <div class="phead"><h2>Prüfung / Moderation</h2></div>
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <% if (order.status === 'ignoriert') { %>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/ignorieren-aufheben"><button class="btn btn-line btn-block">Markierung „ignoriert" aufheben</button></form>
+        <% } else { %>
+          <form method="post" action="/admin/bestellung/<%= order.id %>/ignorieren"><button class="btn btn-block" style="background:#fff;border:1px solid #d9534f;color:#c0392b">Ignorieren (verdächtig markieren)</button></form>
+        <% } %>
+        <form method="post" action="/admin/bestellung/<%= order.id %>/loeschen-bannen" id="banForm">
+          <input type="hidden" name="confirm" value="ja">
+          <button class="btn btn-block" style="background:#c0392b;color:#fff" type="button"
+            onclick="gbOpenBan()">Löschen und Bannen</button>
+        </form>
+        <p class="form-note" style="margin:0">„Löschen und Bannen" entfernt Bestellungen + Konto und sperrt die E-Mail. Der Kunde wird nicht informiert.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sicherheits-Dialog für Löschen & Bannen (selbsttragend, cache-unabhängig) -->
+<style>
+  .gb-modal{position:fixed;inset:0;background:rgba(15,18,22,.62);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px}
+  .gb-modal.open{display:flex}
+  .gb-modal .gb-box{background:#fff;border-radius:14px;max-width:460px;width:100%;padding:32px;text-align:center;box-shadow:0 40px 90px -20px rgba(0,0,0,.6);animation:gbpop .16s ease-out}
+  @keyframes gbpop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+  .gb-modal .gb-ic{font-size:2.6rem;line-height:1;margin-bottom:8px}
+  .gb-modal h3{font-family:'Barlow Condensed','Inter',sans-serif;font-size:1.55rem;margin:0 0 12px;color:#14171c}
+  .gb-modal p{color:#6b7280;line-height:1.6;font-size:.96rem;margin:0}
+  .gb-modal .gb-acts{display:flex;gap:12px;margin-top:26px}
+  .gb-modal .gb-acts button{flex:1;padding:.85rem 1rem;border-radius:6px;font-weight:600;font-size:.98rem;cursor:pointer;font-family:'Inter',sans-serif}
+  .gb-modal .gb-cancel{background:#fff;border:1px solid #d5d9df;color:#14171c}
+  .gb-modal .gb-cancel:hover{border-color:#b6bcc5}
+  .gb-modal .gb-ok{background:#c0392b;border:1px solid #c0392b;color:#fff}
+  .gb-modal .gb-ok:hover{background:#a5291b}
+  body.gb-noscroll{overflow:hidden}
+</style>
+<div id="banModal" class="gb-modal" role="dialog" aria-modal="true" onclick="if(event.target===this)gbCloseBan()">
+  <div class="gb-box">
+    <div class="gb-ic">⚠️</div>
+    <h3>Wirklich löschen und bannen?</h3>
+    <p>Dadurch werden <strong>alle Bestellungen dieses Kunden</strong> gelöscht, das Kundenkonto entfernt und die
+    E-Mail-Adresse <strong>dauerhaft gesperrt</strong>. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+    <div class="gb-acts">
+      <button type="button" class="gb-cancel" onclick="gbCloseBan()">Abbrechen</button>
+      <button type="button" class="gb-ok" onclick="document.getElementById('banForm').submit()">Ja, endgültig löschen</button>
+    </div>
+  </div>
+</div>
+
+<div id="sendModal" class="gb-modal" role="dialog" aria-modal="true" onclick="if(event.target===this)gbClose('sendModal')">
+  <div class="gb-box">
+    <div class="gb-ic">📧</div>
+    <h3>Rechnung jetzt rausschicken?</h3>
+    <p>Es wird eine <strong>PDF-Rechnung erzeugt</strong> und per E-Mail an den Kunden gesendet. Der Bestellstatus wechselt auf „Rechnung rausgeschickt“.</p>
+    <div class="gb-acts">
+      <button type="button" class="gb-cancel" onclick="gbClose('sendModal')">Abbrechen</button>
+      <button type="button" class="gb-ok" style="background:#e5661f;border-color:#e5661f" onclick="var f=document.getElementById('invForm'); f.action='/admin/bestellung/<%= order.id %>/rechnung'; f.submit();">Ja, Rechnung senden</button>
+    </div>
+  </div>
+</div>
+<script>
+  function gbOpen(id){ document.getElementById(id).classList.add('open'); document.body.classList.add('gb-noscroll'); }
+  function gbClose(id){ document.getElementById(id).classList.remove('open'); document.body.classList.remove('gb-noscroll'); }
+  function gbOpenBan(){ document.getElementById('banModal').classList.add('open'); document.body.classList.add('gb-noscroll'); }
+  function gbCloseBan(){ document.getElementById('banModal').classList.remove('open'); document.body.classList.remove('gb-noscroll'); }
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ gbClose('banModal'); gbClose('sendModal'); } });
+</script>
+
+<%- include('../partials/admin-footer') %>

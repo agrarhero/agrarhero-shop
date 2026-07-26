@@ -1,0 +1,129 @@
+<svg class="hs-svg" viewBox="0 0 1600 380" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="hsSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22331f"/>
+      <stop offset="16%" stop-color="#294024"/>
+      <stop offset="26%" stop-color="#5f6d38"/>
+      <stop offset="31%" stop-color="#d9b471"/>
+      <stop offset="34%" stop-color="#eec983"/>
+      <stop offset="100%" stop-color="#eec983"/>
+    </linearGradient>
+    <radialGradient id="hsSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff4d6"/>
+      <stop offset="34%" stop-color="#ffe6a6" stop-opacity="0.95"/>
+      <stop offset="72%" stop-color="#f4c977" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#f4c977" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hsField" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7f9a4e"/><stop offset="45%" stop-color="#5c7c3d"/><stop offset="100%" stop-color="#3c5a2c"/>
+    </linearGradient>
+    <linearGradient id="hsRim" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3cf84"/><stop offset="100%" stop-color="#f3cf84" stop-opacity="0"/></linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="380" fill="url(#hsSky)"/>
+
+  <!-- tiefstehende Sonne am Horizont -->
+  <g class="hs-sun"><circle cx="1120" cy="126" r="150" fill="url(#hsSun)"/><circle cx="1120" cy="124" r="38" fill="#fff0bd"/></g>
+
+  <!-- Dunstbänder -->
+  <g class="hs-haze" fill="#f4dca0" opacity="0.20"><rect x="0" y="108" width="1600" height="7" rx="3"/><rect x="0" y="120" width="1600" height="5" rx="2"/></g>
+
+  <!-- Vögel -->
+  <g class="hs-birds" stroke="#31402a" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.5">
+    <path d="M540 58 q8 -7 16 0 q8 -7 16 0"/><path d="M588 70 q6 -5 12 0 q6 -5 12 0"/>
+  </g>
+
+  <!-- ferne Hügel + Gehöft (Dunst) -->
+  <path d="M0 118 q320 -22 640 -6 q340 18 700 -6 q200 -14 260 0 l0 40 l-1600 0 z" fill="#7f9a5f" opacity="0.55"/>
+  <g opacity="0.5" fill="#4c6438" transform="translate(1300,92)"><rect x="70" y="6" width="24" height="34" rx="12"/><rect x="-4" y="14" width="66" height="28"/><path d="M-8 14 L29 -4 L66 14 Z"/></g>
+
+  <!-- Acker mit Fluchtlinien -->
+  <path d="M0 128 q400 -20 800 -4 q400 16 800 -6 l0 260 l-1600 0 z" fill="url(#hsField)"/>
+  <g stroke="#33502a" stroke-width="2.4" opacity="0.45">
+    <path d="M1000 130 L-60 380"/><path d="M1000 130 L260 380"/><path d="M1000 130 L520 380"/><path d="M1000 130 L780 380"/>
+    <path d="M1000 130 L1000 380"/><path d="M1000 130 L1240 380"/><path d="M1000 130 L1520 380"/><path d="M1000 130 L1780 380"/>
+  </g>
+
+  <!-- mittlere Baumreihe nahe Horizont -->
+  <g fill="#2b421f" opacity="0.8">
+    <g transform="translate(700,104)"><rect x="13" y="22" width="5" height="22" fill="#26381d"/><path d="M15 -4 C1 5 3 34 15 34 C27 34 29 5 15 -4 Z"/></g>
+    <g transform="translate(770,110) scale(0.8)"><path d="M15 -4 C1 5 3 34 15 34 C27 34 29 5 15 -4 Z"/></g>
+  </g>
+
+  <!-- ===== VORDERGRUND ===== -->
+
+  <!-- LINKS: Wald + Fäller + Polter -->
+  <g fill="#15271a">
+    <g transform="translate(24,184) scale(0.82)"><rect x="70" y="150" width="20" height="70" fill="#2a1c12"/><path d="M80 0 C40 24 44 120 80 128 C116 120 120 24 80 0 Z"/><path d="M80 0 C58 16 60 60 80 66 C100 60 102 16 80 0 Z" fill="url(#hsRim)" opacity="0.35"/></g>
+    <g transform="translate(-26,214) scale(0.6)"><rect x="60" y="150" width="18" height="70" fill="#2a1c12"/><path d="M69 6 C34 28 38 120 69 128 C100 120 104 28 69 6 Z"/></g>
+    <g transform="translate(150,352)"><ellipse cx="0" cy="0" rx="46" ry="9"/><ellipse cx="0" cy="-13" rx="40" ry="8"/><ellipse cx="46" cy="0" rx="7" ry="9" fill="#3a2a1a"/><ellipse cx="40" cy="-13" rx="6" ry="8" fill="#3a2a1a"/></g>
+  </g>
+  <!-- Fäller + gefällter Stamm -->
+  <g transform="translate(300,296)">
+    <ellipse cx="18" cy="66" rx="60" ry="10" fill="#0f1d12" opacity="0.5"/>
+    <ellipse cx="0" cy="48" rx="58" ry="10" fill="#2a1c12"/><ellipse cx="58" cy="48" rx="9" ry="10" fill="#3a2a1a"/>
+    <g fill="#15271a">
+      <path d="M2 18 l4 40 l8 0 l0 -26 l6 0 l0 26 l8 0 l4 -40 z"/>
+      <path d="M-3 -6 q20 -14 40 0 l-2 26 q-18 -11 -36 0 z"/>
+      <circle cx="18" cy="-16" r="11"/>
+      <rect x="28" y="4" width="28" height="8" rx="4" transform="rotate(18 28 8)"/>
+    </g>
+    <path d="M7 -18 q11 -7 22 0" stroke="url(#hsRim)" stroke-width="3" fill="none" opacity="0.4"/>
+    <g transform="translate(48,12)">
+      <rect x="0" y="-8" width="22" height="15" rx="4" fill="#1a1410"/><rect x="20" y="-4" width="36" height="6" rx="3" fill="#2b2b2b"/>
+      <g class="hs-saw" fill="#e8c188" opacity="0.85"><circle cx="56" cy="-1" r="2.4"/><circle cx="60" cy="-7" r="1.8"/><circle cx="52" cy="-9" r="1.6"/></g>
+    </g>
+  </g>
+
+  <!-- LINKS-MITTE: Seilwinde zieht Stamm -->
+  <g transform="translate(455,300)">
+    <ellipse cx="140" cy="62" rx="72" ry="10" fill="#0f1d12" opacity="0.45"/>
+    <g class="hs-log"><ellipse cx="156" cy="50" rx="66" ry="10" fill="#2a1c12"/><ellipse cx="222" cy="50" rx="9" ry="10" fill="#3a2a1a"/></g>
+    <path class="hs-cable" d="M28 30 L156 48" stroke="#0e1a10" stroke-width="3"/>
+    <g fill="#15271a">
+      <rect x="-30" y="10" width="54" height="42" rx="6"/><circle cx="-2" cy="34" r="14"/><rect x="-40" y="50" width="72" height="8" rx="3"/>
+      <path d="M-34 58 l-7 18 M28 58 l7 18" stroke="#15271a" stroke-width="7" stroke-linecap="round"/>
+    </g>
+    <path d="M-30 12 l54 0" stroke="url(#hsRim)" stroke-width="2.4" opacity="0.4"/>
+  </g>
+
+  <!-- RECHTS-MITTE: Traktor + Güllefass beim Ausbringen -->
+  <g transform="translate(870,150)">
+    <ellipse cx="200" cy="212" rx="240" ry="16" fill="#0f1d12" opacity="0.45"/>
+    <g fill="#15271a" transform="translate(0,60)">
+      <rect x="8" y="86" width="44" height="12" rx="6"/><rect x="30" y="34" width="92" height="46" rx="8"/><rect x="24" y="-4" width="52" height="46" rx="8"/>
+      <rect x="118" y="30" width="30" height="34" rx="6"/><rect x="116" y="-8" width="9" height="22" rx="3"/>
+      <circle cx="118" cy="112" r="46"/><circle cx="118" cy="112" r="20" fill="#0d1810"/><circle cx="40" cy="118" r="28"/><circle cx="40" cy="118" r="12" fill="#0d1810"/>
+      <path d="M24 -4 l52 0" stroke="url(#hsRim)" stroke-width="3" opacity="0.5"/><rect x="30" y="2" width="38" height="26" rx="4" fill="#3a4a24" opacity="0.5"/>
+    </g>
+    <g fill="#15271a" transform="translate(150,70)">
+      <rect x="0" y="60" width="250" height="12" rx="6"/><rect x="18" y="4" width="212" height="86" rx="43"/>
+      <path d="M30 6 q90 -10 180 2" stroke="url(#hsRim)" stroke-width="3" fill="none" opacity="0.5"/>
+      <rect x="104" y="-8" width="34" height="16" rx="4"/>
+      <circle cx="86" cy="104" r="30"/><circle cx="86" cy="104" r="13" fill="#0d1810"/><circle cx="170" cy="104" r="30"/><circle cx="170" cy="104" r="13" fill="#0d1810"/>
+      <rect x="226" y="52" width="26" height="40" rx="4"/>
+      <g class="hs-spray"><path d="M250 74 L332 146 L250 126 Z" fill="#7a5a30" opacity="0.3"/><g class="hs-drops" fill="#6a4f2c"><circle cx="276" cy="102" r="3.4"/><circle cx="298" cy="118" r="3"/><circle cx="318" cy="134" r="3.4"/><circle cx="290" cy="134" r="2.4"/></g></g>
+    </g>
+  </g>
+
+  <!-- RECHTS: Weidezaun + Rinder -->
+  <g fill="#15271a">
+    <g class="hs-cattle" transform="translate(1420,318)">
+      <ellipse cx="0" cy="56" rx="50" ry="8" fill="#0f1d12" opacity="0.4"/>
+      <path d="M-46 0 q6 -21 29 -21 q10 -13 23 -6 q10 -2 12 8 q13 2 13 17 l0 6 q-6 6 -13 4 l-56 0 q-8 0 -8 -8 z"/>
+      <rect x="-42" y="15" width="7" height="34"/><rect x="-25" y="17" width="7" height="32"/><rect x="23" y="17" width="7" height="32"/><rect x="38" y="15" width="7" height="34"/>
+      <path d="M38 -21 q10 -10 21 -6 q-2 12 -13 16 z"/>
+      <path d="M-46 2 q38 -13 80 2" stroke="url(#hsRim)" stroke-width="2.4" fill="none" opacity="0.45"/>
+    </g>
+    <g transform="translate(1548,332) scale(0.78)">
+      <ellipse cx="0" cy="56" rx="50" ry="8" fill="#0f1d12" opacity="0.4"/>
+      <path d="M-46 0 q6 -21 29 -21 q10 -13 23 -6 q10 -2 12 8 q13 2 13 17 l0 6 q-6 6 -13 4 l-56 0 q-8 0 -8 -8 z"/>
+      <rect x="-42" y="15" width="7" height="34"/><rect x="-25" y="17" width="7" height="32"/><rect x="23" y="17" width="7" height="32"/><rect x="38" y="15" width="7" height="34"/>
+      <path d="M38 -21 q10 -10 21 -6 q-2 12 -13 16 z"/>
+    </g>
+    <g><rect x="1360" y="342" width="6" height="42"/><rect x="1580" y="342" width="6" height="42"/><rect x="1470" y="342" width="6" height="42"/><rect x="1360" y="352" width="226" height="5"/><rect x="1360" y="366" width="226" height="5"/></g>
+  </g>
+
+  <!-- Grasbüschel vorne -->
+  <g stroke="#1a2e18" stroke-width="3" stroke-linecap="round" opacity="0.7"><path d="M30 376 l0 -14 M42 378 l0 -16 M54 376 l0 -12"/><path d="M770 378 l0 -14 M782 380 l0 -16"/></g>
+</svg>

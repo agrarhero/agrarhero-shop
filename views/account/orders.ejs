@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<div class="page-head"><div class="wrap"><div class="crumb"><a href="/konto">Mein Konto</a> › Bestellungen</div><h1>Meine Bestellungen</h1></div></div>
+<section class="block">
+  <div class="wrap">
+    <div class="acct-layout">
+      <%- include('../partials/account-nav') %>
+      <div class="acct-content">
+        <% if (!orders.length) { %>
+          <div class="acct-empty">
+            <div class="mini-crate" style="margin:0 auto 14px"></div>
+            <p>Sie haben noch keine Bestellungen aufgegeben.</p>
+            <a class="btn btn-accent" href="/produkte">Zum Sortiment ▸</a>
+          </div>
+        <% } else { %>
+          <% orders.forEach(function(o){ %>
+            <%- include('../partials/order-card', { o: o, stat: stat }) %>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

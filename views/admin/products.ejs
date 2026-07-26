@@ -1,0 +1,68 @@
+<%- include('../partials/admin-header') %>
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 style="font-size:2rem">Produkte</h1>
+    <p style="color:var(--muted);font-size:.92rem">Produkte bearbeiten (Bild, Texte, Preis, Bestseller, Reihenfolge) über <strong>Bearbeiten</strong>. Mindest-/Maximalmengen lassen sich hier direkt in der Liste ändern. <strong>Bestand</strong> ist der Lagerbestand, den Kunden sehen. Feld leer lassen = keine Bestandsanzeige.</p>
+  </div>
+  <a class="btn btn-accent" href="/admin/produkte/neu">+ Neues Produkt</a>
+</div>
+
+<form method="post" action="/admin/produkte/speichern">
+  <div class="panel" style="padding:6px 10px">
+    <table class="tbl">
+      <thead><tr>
+        <th>Produkt</th><th>Gruppe</th><th class="r">Preis</th><th>Status</th><th class="c" style="width:120px">Mindest.</th><th class="c" style="width:120px">Maximal</th><th class="c" style="width:120px">Bestand</th><th></th>
+      </tr></thead>
+      <tbody>
+        <% var lastGroup=''; products.forEach(function(p){ %>
+          <% if (p.product_group !== lastGroup) { lastGroup = p.product_group; %>
+            <tr class="grp-row"><td colspan="8"><%= h.groupLabel(p.product_group) %></td></tr>
+          <% } %>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <% if (p.image) { %><img src="/img/products/<%= p.image %>" alt="" style="width:42px;height:32px;object-fit:contain;border:1px solid var(--line);border-radius:5px;background:#fff"><% } %>
+                <div>
+                  <div style="font-weight:600"><%= p.name %></div>
+                  <div style="color:var(--muted);font-size:.8rem"><%= p.type %></div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--muted)"><%= h.groupLabelSingular(p.product_group) %></td>
+            <td class="r"><%= h.euro(p.price_cents) %></td>
+            <td>
+              <% if (p.sold_out) { %><span class="pill pill-sold">Ausverkauft</span><% } else { %><span class="pill pill-ok">Aktiv</span><% } %>
+            </td>
+            <td class="c">
+              <div class="minqty">
+                <input type="number" name="min_<%= p.id %>" value="<%= p.min_order || 1 %>" min="1" max="100000" step="1">
+                <span>Stück</span>
+              </div>
+            </td>
+            <td class="c">
+              <div class="minqty">
+                <input type="number" name="max_<%= p.id %>" value="<%= p.max_order || 200 %>" min="1" max="100000" step="1">
+                <span>Stück</span>
+              </div>
+            </td>
+            <td class="c">
+              <div class="minqty">
+                <input type="number" name="stock_<%= p.id %>" value="<%= p.stock == null ? '' : p.stock %>" min="0" max="100000" step="1" placeholder="–">
+                <span>Stück</span>
+              </div>
+            </td>
+            <td class="r"><a class="btn btn-dark btn-sm" href="/admin/produkte/<%= p.id %>">Bearbeiten</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap">
+    <p style="color:var(--muted);font-size:.85rem;margin:0">Änderungen gelten sofort im Shop. Kunden können dann nicht weniger als die Mindestmenge bestellen.</p>
+    <button class="btn btn-accent" type="submit">Mengen & Bestand speichern</button>
+  </div>
+</form>
+
+<%- include('../partials/admin-footer') %>

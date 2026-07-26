@@ -1,0 +1,10 @@
+<% var _a = (typeof avg !== 'undefined' && avg) ? avg : 0; var _c = (typeof count !== 'undefined' && count) ? count : 0; var _p = Math.round((_a/5)*100); %>
+<% if (!_c) { %>
+<span class="rating rating-none">Noch keine Bewertungen</span>
+<% } else { %>
+<span class="rating">
+  <span class="starbar" style="--p:<%= _p %>%" title="<%= _a.toFixed(1).replace('.', ',') %> von 5 Sternen"></span>
+  <% if (typeof showValue === 'undefined' || showValue) { %><span class="rval"><%= _a.toFixed(1).replace('.', ',') %></span><% } %>
+  <span class="rcnt">(<%= _c %>)</span>
+</span>
+<% } %>

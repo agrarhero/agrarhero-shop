@@ -1,0 +1,99 @@
+<%- include('../partials/header') %>
+<% var ship = h.orderShipping(order); %>
+<% var cur = stat.customerStep(order.status); var cc = stat.customerColor(order.status); %>
+<div class="page-head"><div class="wrap"><div class="crumb"><a href="/konto">Mein Konto</a> › <a href="/konto/bestellungen">Bestellungen</a> › <%= order.order_number %></div><h1>Bestellung <%= order.order_number %></h1></div></div>
+
+<section class="block">
+  <div class="wrap">
+    <div class="acct-layout">
+      <%- include('../partials/account-nav') %>
+      <div class="acct-content">
+
+        <div class="od-top">
+          <div>
+            <span class="badge b-<%= cc %>" style="font-size:.82rem"><%= stat.customerLabel(order.status) %></span>
+            <% if (stat.customerNote(order.status)) { %><span style="font-size:.82rem;color:#a5540f;margin-left:8px"><%= stat.customerNote(order.status) %></span><% } %>
+            <div style="color:var(--muted);font-size:.9rem;margin-top:6px">Bestellt am <%= h.dateTimeDE(order.created_at) %></div>
+          </div>
+          <% if (order.invoice_sent_at) { %>
+            <a class="btn btn-dark btn-sm" href="/konto/rechnung/<%= order.order_number %>.pdf" target="_blank">Rechnung (PDF)</a>
+          <% } %>
+        </div>
+
+        <!-- Statusverlauf -->
+        <div class="panel" style="padding:26px 22px;margin-bottom:20px">
+          <div class="timeline">
+            <% stat.CUSTOMER_STEPS.forEach(function(label,i){ var clx = i<cur?'done':(i===cur?'active':''); %>
+              <div class="tl-step <%= clx %>">
+                <div class="tl-dot"><%= i<cur ? '✓' : (i+1) %></div>
+                <div class="tl-label"><%= label %></div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Artikel -->
+        <div class="panel" style="margin-bottom:20px">
+          <div class="phead"><h2>Artikel</h2></div>
+          <div class="oc-items" style="padding:4px 14px">
+            <% items.forEach(function(it){ var link = it.product_slug ? ('/produkt/'+it.product_slug) : null; %>
+              <% if (link) { %><a class="oc-item" href="<%= link %>"><% } else { %><div class="oc-item nolink"><% } %>
+                <span class="oc-thumb"><% if (it.product_image) { %><img src="/img/products/<%= it.product_image %>" alt="<%= it.name %>"><% } else { %><span class="mini-crate"></span><% } %></span>
+                <span class="oc-info"><span class="oc-name"><%= it.name %></span><% if (it.type) { %><span class="oc-type"><%= it.type %></span><% } %></span>
+                <span class="oc-qty"><%= it.quantity %>&times;</span>
+                <span class="oc-price"><%= h.euro(it.unit_cents * it.quantity) %></span>
+              <% if (link) { %></a><% } else { %></div><% } %>
+            <% }) %>
+          </div>
+          <div style="padding:14px 22px;border-top:1px solid var(--line)">
+            <div class="summary" style="border:none;background:none;padding:0;max-width:320px;margin-left:auto">
+              <div class="line"><span>Zwischensumme (netto)</span><span><%= h.euro(totals.subtotal) %></span></div>
+              <div class="line"><span>Versand</span><span><% if (totals.shipping > 0) { %><%= h.euro(totals.shipping) %><% } else { %><span class="ship-free">kostenlos</span><% } %></span></div>
+              <div class="line"><span>zzgl. <%= totals.taxRate %> % MwSt.</span><span><%= h.euro(totals.tax) %></span></div>
+              <div class="line total"><span>Gesamt</span><span><%= h.euro(totals.gross) %></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adresse & Zahlung -->
+        <div class="od-cols">
+          <div class="panel">
+            <div class="phead"><h2>Lieferadresse<% if (ship.different) { %> (abweichend)<% } %></h2></div>
+            <div style="padding:16px 20px;font-size:.92rem;line-height:1.8">
+              <% if (ship.company){ %><strong><%= ship.company %></strong><br><% } %>
+              <%= (ship.first_name+' '+ship.last_name).trim() %><br>
+              <%= ship.street %><br>
+              <%= (ship.zip+' '+ship.city).trim() %><br>
+              <%= ship.country %>
+              <% if (ship.different) { %>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+                  <span style="color:var(--muted);font-size:.82rem">Rechnungsadresse:</span><br>
+                  <% if (order.cust_company){ %><%= order.cust_company %><br><% } %>
+                  <%= (order.cust_first_name||'')+' '+(order.cust_last_name||'') %><br>
+                  <%= order.cust_street || '' %>, <%= (order.cust_zip||'')+' '+(order.cust_city||'') %>
+                </div>
+              <% } %>
+              <div style="margin-top:8px;color:var(--muted)"><%= order.cust_email %> · <%= order.cust_phone || '' %></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="phead"><h2>Zahlung & Versand</h2></div>
+            <div style="padding:16px 20px;font-size:.92rem;line-height:1.9">
+              <span style="color:var(--muted)">Zahlungsart:</span> <%= order.payment_method === 'rechnung' ? 'Kauf auf Rechnung' : 'Vorkasse – Rechnung per E-Mail' %><br>
+              <% if (order.invoice_sent_at) { %>
+                <span style="color:var(--muted)">Rechnung versendet:</span> <%= h.dateTimeDE(order.invoice_sent_at) %><br>
+                <span style="color:var(--muted)">Zahlungsziel:</span> <%= order.payment_days || '14' %> Werktage
+              <% } else { %>
+                <span style="color:var(--muted)">Status:</span> Ihre Rechnung wird nach Prüfung per E-Mail versendet.
+              <% } %>
+              <br><span style="color:var(--muted)">Lieferung:</span> <%= order.delivery_days || '3-6' %> Werktage nach Zahlungseingang
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px"><a class="btn btn-line" href="/konto/bestellungen">‹ Zurück zu meinen Bestellungen</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

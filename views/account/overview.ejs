@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+<%
+  var __hr = Number(new Intl.DateTimeFormat('de-DE', { hour: 'numeric', hour12: false, timeZone: 'Europe/Berlin' }).format(new Date()));
+  var greeting = __hr < 11 ? 'Guten Morgen' : (__hr < 18 ? 'Guten Tag' : 'Guten Abend');
+  var displayName = user.first_name ? (user.first_name + ' ' + (user.last_name || '')).trim() : user.email;
+%>
+<div class="page-head"><div class="wrap"><div class="crumb">Mein Konto</div><h1>Übersicht</h1></div></div>
+<section class="block">
+  <div class="wrap">
+    <div class="acct-layout">
+      <%- include('../partials/account-nav') %>
+      <div class="acct-content">
+
+        <div class="acct-hero">
+          <div class="ah-top">
+            <div>
+              <div class="ah-greet"><%= greeting %></div>
+              <h2 class="ah-name"><%= displayName %></h2>
+              <p class="ah-sub">Schön, dass Sie da sind – hier behalten Sie Bestellungen, Rechnungen und Ihre Daten jederzeit im Blick.</p>
+            </div>
+            <span class="ah-logo"><span class="mark"></span></span>
+          </div>
+          <div class="ah-meta">
+            <div class="ahm"><span>Kundennummer</span><strong><%= user.customer_number || '—' %></strong></div>
+            <div class="ahm"><span>Kunde seit</span><strong><%= h.dateDE(user.created_at) %></strong></div>
+            <div class="ahm"><span>Kontotyp</span><strong><%= user.customer_type === 'privat' ? 'Privatkunde' : 'Firmenkunde' %></strong></div>
+            <% if (user.customer_type !== 'privat' && user.company) { %><div class="ahm"><span>Firma</span><strong><%= user.company %></strong></div><% } %>
+          </div>
+        </div>
+
+        <div class="acct-tiles">
+          <a href="/konto/bestellungen" class="acct-tile">
+            <div class="at-num"><%= orders.length %></div>
+            <div class="at-lbl">Bestellungen</div>
+          </a>
+          <a href="/konto/daten" class="acct-tile">
+            <div class="at-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+            <div class="at-lbl">Meine Daten</div>
+          </a>
+          <a href="/konto/passwort" class="acct-tile">
+            <div class="at-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+            <div class="at-lbl">Passwort</div>
+          </a>
+          <a href="/produkte" class="acct-tile at-accent">
+            <div class="at-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/></svg></div>
+            <div class="at-lbl">Weiter einkaufen</div>
+          </a>
+        </div>
+
+        <% if (orders.length) { %>
+          <div class="section-title">Letzte Bestellung</div>
+          <%- include('../partials/order-card', { o: orders[0], stat: stat }) %>
+          <% if (orders.length > 1) { %><div style="text-align:center;margin-top:14px"><a class="btn btn-line" href="/konto/bestellungen">Alle Bestellungen ansehen ▸</a></div><% } %>
+        <% } else { %>
+          <div class="acct-empty">
+            <div class="mini-crate" style="margin:0 auto 14px"></div>
+            <p>Sie haben noch keine Bestellungen.</p>
+            <a class="btn btn-accent" href="/produkte">Zum Sortiment ▸</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

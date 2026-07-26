@@ -1,0 +1,103 @@
+<%- include('partials/header') %>
+
+<div class="page-head">
+  <div class="wrap"><div class="crumb"><a href="/warenkorb">Warenkorb</a> › Kasse</div><h1>Kasse</h1></div>
+</div>
+
+<section class="block">
+  <div class="wrap">
+    <form method="post" action="/kasse" data-validate>
+      <div class="cart-layout">
+        <div>
+          <div class="form-card">
+            <div class="section-title" style="margin-top:0">Rechnungsadresse</div>
+            <div class="grid2">
+              <div class="field"><label>Vorname *</label><input name="first_name" value="<%= user.first_name || '' %>" required></div>
+              <div class="field"><label>Nachname *</label><input name="last_name" value="<%= user.last_name || '' %>" required></div>
+            </div>
+            <div class="field"><label>Firma (optional)</label><input name="company" value="<%= user.company || '' %>"></div>
+            <div class="field"><label>Straße & Hausnummer *</label><input name="street" value="<%= user.street || '' %>" required></div>
+            <div class="grid2">
+              <div class="field"><label>PLZ *</label><input name="zip" value="<%= user.zip || '' %>" required></div>
+              <div class="field"><label>Ort *</label><input name="city" value="<%= user.city || '' %>" required></div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label>Land</label><input name="country" value="<%= user.country || 'Deutschland' %>"></div>
+              <div class="field"><label>Telefon *</label><input name="phone" value="<%= user.phone || '' %>" required></div>
+            </div>
+            <div class="field"><label>E-Mail *</label><input type="email" name="email" value="<%= user.email || '' %>" required></div>
+            <div class="field"><label>Anmerkung (optional)</label><textarea name="note" rows="3" placeholder="z. B. Wunschtermin, Lieferhinweise"></textarea></div>
+          </div>
+
+          <div class="form-card">
+            <div class="section-title" style="margin-top:0">Lieferadresse</div>
+            <label class="checkline" style="margin-bottom:2px">
+              <input type="checkbox" name="ship_diff" id="coShipDiff" value="ja" <%= user.ship_street ? 'checked' : '' %>>
+              <span>An eine <strong>abweichende Lieferadresse</strong> senden (sonst wird an die Rechnungsadresse geliefert).</span>
+            </label>
+            <div id="coShipFields" class="ship-fields">
+              <p class="form-note" style="margin:0 0 8px">Empfängername ist optional – bleibt das Feld leer, liefern wir an den bereits oben angegebenen Namen (bei Firmenkunden an Firma und Ansprechpartner).</p>
+              <div class="grid2">
+                <div class="field"><label>Vorname Empfänger (optional)</label><input name="ship_first_name" value="<%= user.ship_first_name || '' %>"></div>
+                <div class="field"><label>Nachname Empfänger (optional)</label><input name="ship_last_name" value="<%= user.ship_last_name || '' %>"></div>
+              </div>
+              <div class="field"><label>Firma (optional)</label><input name="ship_company" value="<%= user.ship_company || '' %>"></div>
+              <div class="field"><label>Straße & Hausnummer</label><input name="ship_street" value="<%= user.ship_street || '' %>"></div>
+              <div class="grid3">
+                <div class="field"><label>PLZ</label><input name="ship_zip" value="<%= user.ship_zip || '' %>"></div>
+                <div class="field"><label>Ort</label><input name="ship_city" value="<%= user.ship_city || '' %>"></div>
+                <div class="field"><label>Land</label><input name="ship_country" value="<%= user.ship_country || 'Deutschland' %>"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="section-title" style="margin-top:0">Zahlungsart</div>
+            <label class="payopt">
+              <input type="radio" name="payment_method" value="vorkasse" checked>
+              <span class="po-body"><span class="po-title">Vorkasse – Rechnung per E-Mail</span>
+              <span class="po-sub">Sie erhalten nach Prüfung Ihrer Bestellung die Rechnung mit allen Zahlungsdaten und überweisen den Betrag bequem vorab. Nach Zahlungseingang versenden wir die Ware.</span></span>
+            </label>
+            <label class="payopt <%= rechnungFrei ? '' : 'is-locked' %>">
+              <input type="radio" name="payment_method" value="rechnung" <%= rechnungFrei ? '' : 'disabled' %>>
+              <span class="po-body"><span class="po-title">Kauf auf Rechnung <% if (!rechnungFrei) { %><span class="po-lock">🔒 nicht verfügbar</span><% } %></span>
+              <% if (rechnungFrei) { %>
+                <span class="po-sub">Für Ihr Konto freigeschaltet – Zahlung innerhalb des Zahlungsziels nach Erhalt der Ware.</span>
+              <% } else { %>
+                <span class="po-sub">Diese Zahlungsart ist für Ihr Konto derzeit noch nicht verfügbar.</span>
+              <% } %></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="summary">
+          <h3>Ihre Bestellung</h3>
+          <% items.forEach(function(it){ %>
+            <div class="line"><span><%= it.quantity %>× <%= it.name %><% if (it.color) { %> <span style="color:var(--accent)">(<%= it.color %>)</span><% } %></span><span><%= h.euro(it.unit_cents*it.quantity) %></span></div>
+          <% }) %>
+          <div class="line" style="border-top:1px solid var(--line);margin-top:8px;padding-top:12px"><span>Zwischensumme (netto)</span><span><%= h.euro(totals.subtotal) %></span></div>
+          <div class="line"><span>Versand (Deutschland)</span><span><% if (totals.shipping > 0) { %><%= h.euro(totals.shipping) %><% } else { %><span class="ship-free">kostenlos</span><% } %></span></div>
+          <div class="line"><span>zzgl. <%= totals.taxRate %> % MwSt.</span><span><%= h.euro(totals.tax) %></span></div>
+          <div class="line total"><span>Gesamt</span><span><%= h.euro(totals.gross) %></span></div>
+          <label class="checkline" style="margin-top:16px">
+            <input type="checkbox" name="agb" value="ja" required>
+            <span>Ich akzeptiere die <a href="/agb" target="_blank">AGB</a> und die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a>. *</span>
+          </label>
+          <button class="btn btn-accent btn-block" type="submit" style="margin-top:16px">Zahlungspflichtig bestellen</button>
+          <p class="form-note" style="margin-top:14px">Mit dem Absenden erhalten Sie eine Bestellbestätigung. Die Rechnung mit Zahlungsdaten folgt nach Prüfung per E-Mail. Standardmäßig erfolgt die Zahlung per Vorkasse (14 Werktage); „Kauf auf Rechnung" ist nur nach individueller Freischaltung Ihres Kontos verfügbar.</p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+(function(){
+  var cb=document.getElementById('coShipDiff'), box=document.getElementById('coShipFields');
+  if(!cb||!box) return;
+  var req=['ship_street','ship_zip','ship_city'];
+  function apply(){ box.style.display=cb.checked?'':'none'; req.forEach(function(n){var el=box.querySelector('[name="'+n+'"]'); if(el) el.required=cb.checked;}); }
+  cb.addEventListener('change',apply); apply();
+})();
+</script>
+<%- include('partials/footer') %>

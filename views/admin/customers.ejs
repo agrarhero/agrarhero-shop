@@ -1,0 +1,101 @@
+<%- include('../partials/admin-header') %>
+<div style="margin-bottom:18px">
+  <h1 style="font-size:2rem">Kunden</h1>
+  <p style="color:var(--muted);font-size:.92rem">Alle registrierten Kunden – auch ohne Bestellung. „Warenkorb" zeigt den aktuellen Stand (beim Neuladen).</p>
+</div>
+
+<div class="live-bar">
+  <div class="live-card is-on">
+    <span class="lc-dot"></span>
+    <div><div class="lc-n" id="liveOnline"><%= onlineCount %></div><div class="lc-l">Kunden online</div></div>
+  </div>
+  <a class="live-card is-guest" href="/admin/gaeste" style="text-decoration:none;color:inherit;cursor:pointer" title="Alle Gäste mit Details ansehen">
+    <span class="lc-eye" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+    </span>
+    <div><div class="lc-n" id="liveGuests"><%= guests %></div><div class="lc-l">Gäste gerade auf der Seite&nbsp;›</div></div>
+  </a>
+  <div class="live-note">
+    <span class="pulse-live"></span> Aktualisiert automatisch alle 15&nbsp;Sek.<br>
+    „Online" = Aktivität in den letzten 10&nbsp;Minuten. Gäste = nicht angemeldete Besucher (ohne Bots).
+  </div>
+</div>
+
+<div class="panel" style="padding:6px 10px">
+  <% if (users.length === 0) { %>
+    <div style="padding:44px;text-align:center;color:var(--muted)">Noch keine registrierten Kunden.</div>
+  <% } else { %>
+  <table class="tbl">
+    <thead><tr><th>Kunde</th><th class="c">Status</th><th>Typ / Firma</th><th>Registriert</th><th class="c">Best.</th><th class="c">Warenkorb</th><th>IP / Herkunft</th><th class="c">E-Mail best&auml;tigt</th><th class="r">Sicherheit &amp; Profil</th></tr></thead>
+    <tbody>
+    <% users.forEach(function(u){ %>
+      <tr>
+        <td style="font-weight:600"><% if (u.riskLevel==='bad'){ %><span class="risk-flag rf-bad" title="Erhöhtes Fake-/Troll-Risiko – bitte Profil prüfen"></span> <% } else if (u.riskLevel==='warn'){ %><span class="risk-flag rf-warn" title="Leicht auffällig"></span> <% } %><%= (u.first_name||'')+' '+(u.last_name||'') %><div style="font-size:.8rem;color:var(--muted)"><%= u.email %></div></td>
+        <td class="c pres-cell" data-uid="<%= u.id %>">
+          <span class="pres <%= u.online ? 'is-on' : 'is-off' %>"><span class="pres-dot"></span><span class="pres-txt"><%= u.online ? 'Online' : 'Offline' %></span></span>
+          <div class="pres-seen" style="<%= u.online ? 'display:none' : '' %>"><%= u.last_seen ? 'zuletzt ' + h.relTime(u.last_seen) : 'noch nie aktiv' %></div>
+        </td>
+        <td><span class="badge <%= u.customer_type==='privat' ? 'b-grey':'b-blue' %>" style="font-size:.68rem"><%= u.customer_type==='privat' ? 'Privat':'Firma' %></span><% if (u.company){ %><div style="font-size:.82rem;margin-top:3px"><%= u.company %></div><% } %></td>
+        <td><%= h.dateDE(u.created_at) %></td>
+        <td class="c"><%= u.orderCount %></td>
+        <td class="c"><% if (u.cartCount>0){ %><span class="badge b-orange"><%= u.cartCount %> Art.</span><% } else { %><span style="color:var(--muted)">leer</span><% } %></td>
+        <td style="font-size:.82rem;line-height:1.4">
+          <div class="cust-orig orig-<%= u.origin.kind %>" title="<%= u.origin.detail %>"><%= u.origin.label %></div>
+          <% if (u.last_ip) { %>
+            <div style="margin-top:4px">
+            <span style="font-size:1rem"><%= u.flag || '🏳️' %></span>
+            <strong><%= u.geo_country || (geo.isPrivate(u.last_ip) ? 'Lokal':'—') %></strong>
+            <% if (u.geo_region) { %><br><span style="color:var(--muted)"><%= u.geo_region %></span><% } %>
+            <br><span style="color:var(--muted);font-family:monospace"><%= u.last_ip %></span>
+            </div>
+          <% } %>
+        </td>
+        <td class="c"><% if (u.verified) { %><span class="badge b-green">ja</span><% } else { %><span class="badge b-orange">offen</span><% } %></td>
+        <td class="r">
+          <div class="cust-cta">
+            <a class="secscore-mini ss-<%= u.riskLevel %>" href="/admin/kunden/<%= u.id %>#sicherheit" title="Sicherheits-Check: <%= u.score %> von <%= u.scoreMax %> Punkten &ndash; klicken zum Öffnen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z"/></svg><span><%= u.score %>/<%= u.scoreMax %></span>
+            </a>
+            <a class="btn btn-prof" href="/admin/kunden/<%= u.id %>">Profil<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></a>
+          </div>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<script>
+// Live-Aktualisierung der Präsenz ohne Neuladen der Seite.
+(function(){
+  var onlineEl = document.getElementById('liveOnline');
+  var guestEl  = document.getElementById('liveGuests');
+  function apply(d){
+    if (!d) return;
+    if (onlineEl) onlineEl.textContent = d.onlineCount;
+    if (guestEl)  guestEl.textContent  = d.guests;
+    var on = {}; (d.online || []).forEach(function(id){ on[String(id)] = true; });
+    var cells = document.querySelectorAll('.pres-cell');
+    for (var i = 0; i < cells.length; i++){
+      var cell = cells[i];
+      var isOn = !!on[cell.getAttribute('data-uid')];
+      var pres = cell.querySelector('.pres');
+      var txt  = cell.querySelector('.pres-txt');
+      var seen = cell.querySelector('.pres-seen');
+      if (pres){ pres.classList.toggle('is-on', isOn); pres.classList.toggle('is-off', !isOn); }
+      if (txt)  txt.textContent = isOn ? 'Online' : 'Offline';
+      if (seen) seen.style.display = isOn ? 'none' : '';
+    }
+  }
+  function poll(){
+    fetch('/admin/kunden/live', { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(apply)
+      .catch(function(){});
+  }
+  setInterval(poll, 15000);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') poll(); });
+})();
+</script>
+<%- include('../partials/admin-footer') %>

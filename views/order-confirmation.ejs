@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+<% var ship = h.orderShipping(order); %>
+
+<section class="block">
+  <div class="wrap narrow">
+    <div style="text-align:center;margin-bottom:34px">
+      <div style="width:64px;height:64px;border-radius:50%;background:#e8f6ee;display:grid;place-items:center;margin:0 auto 18px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1f8a4c" stroke-width="2.4" style="width:32px;height:32px"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h1 style="font-size:2.2rem">Vielen Dank für Ihre Bestellung!</h1>
+      <p style="color:var(--muted);margin-top:8px">Bestellnummer <strong style="color:var(--ink)"><%= order.order_number %></strong> · <%= h.dateDE(order.created_at) %></p>
+      <p style="color:var(--muted);margin-top:6px">Eine Bestellbestätigung wurde an <strong style="color:var(--ink)"><%= order.cust_email %></strong> gesendet.</p>
+    </div>
+
+    <div class="spam-hint" style="max-width:620px;margin:0 auto 26px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      <span><strong>Hinweis zu unseren E-Mails:</strong> Ihre Bestellbestätigung und – nach Prüfung Ihrer Bestellung – die <strong>Rechnung</strong> erhalten Sie per E-Mail. Sollten Sie eine Nachricht nicht finden, sehen Sie bitte auch in Ihrem <strong>Spam- bzw. Junk-Ordner</strong> nach.</span>
+    </div>
+
+    <div class="panel" style="padding:6px 10px;margin-bottom:22px">
+      <table class="tbl tbl-stack">
+        <thead><tr><th>Artikel</th><th class="c">Menge</th><th class="r">Einzelpreis</th><th class="r">Summe</th></tr></thead>
+        <tbody>
+        <% items.forEach(function(it){ %>
+          <tr><td><strong><%= it.name %></strong><div style="font-size:.8rem;color:var(--muted)"><%= it.type %></div></td>
+          <td class="c" data-label="Menge"><%= it.quantity %></td><td class="r" data-label="Einzelpreis"><%= h.euro(it.unit_cents) %></td><td class="r" data-label="Summe"><%= h.euro(it.unit_cents*it.quantity) %></td></tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="summary" style="max-width:320px;margin-left:auto">
+      <div class="line"><span>Zwischensumme (netto)</span><span><%= h.euro(totals.subtotal) %></span></div>
+      <div class="line"><span>Versand</span><span><% if (totals.shipping > 0) { %><%= h.euro(totals.shipping) %><% } else { %><span class="ship-free">kostenlos</span><% } %></span></div>
+      <div class="line"><span>zzgl. <%= totals.taxRate %> % MwSt.</span><span><%= h.euro(totals.tax) %></span></div>
+      <div class="line total"><span>Gesamt</span><span><%= h.euro(totals.gross) %></span></div>
+    </div>
+
+    <div class="panel" style="margin-top:26px;padding:16px 20px">
+      <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px">Lieferadresse<% if (ship.different) { %> (abweichend)<% } %></div>
+      <div style="font-size:.92rem;line-height:1.7">
+        <% if (ship.company){ %><strong><%= ship.company %></strong><br><% } %>
+        <%= (ship.first_name+' '+ship.last_name).trim() %><br>
+        <%= ship.street %><br>
+        <%= (ship.zip+' '+ship.city).trim() %><br>
+        <%= ship.country %>
+      </div>
+    </div>
+
+    <div style="background:var(--paper-2);border-radius:8px;padding:20px 24px;margin-top:26px;color:var(--muted);line-height:1.7">
+      <strong style="color:var(--ink)">Wie es weitergeht:</strong> Sobald wir Ihre Bestellung geprüft haben, erhalten Sie die <strong style="color:var(--ink)">Rechnung mit den Zahlungsdaten per E-Mail</strong>.
+      Bitte überweisen Sie den Betrag innerhalb von <%= order.payment_days || '14' %> Werktagen. Nach Zahlungseingang wird die Ware innerhalb von <%= order.delivery_days || '3-6' %> Werktagen versendet.
+      <br><br><strong style="color:var(--ink)">Bestellstatus verfolgen:</strong> Den aktuellen Stand Ihrer Bestellung sehen Sie jederzeit in Ihrem Konto unter <a href="/konto/bestellungen" style="color:var(--accent);font-weight:600">„Meine Bestellungen“</a> → <strong style="color:var(--ink)">„Details“</strong>.
+    </div>
+
+    <div style="text-align:center;margin-top:28px">
+      <a class="btn btn-line" href="/konto/bestellungen">Zu meinen Bestellungen</a>
+      <a class="btn btn-accent" href="/produkte">Weiter einkaufen ▸</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
