@@ -1643,6 +1643,45 @@ img{max-width:100%;height:auto}
 .ah-note{text-align:center;color:var(--muted);max-width:660px;margin:24px auto 0;padding:0 24px}
 .ah-note a{color:var(--accent);font-weight:600}
 
+/* ===== Kundenkonto: neu strukturiertes Dashboard ===== */
+.nd-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 22px;margin-bottom:16px;box-shadow:0 14px 34px -28px rgba(47,93,52,.5)}
+.nd-av{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--steel),var(--accent));color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.2rem;font-family:'Poppins';flex:0 0 auto}
+.nd-hi{flex:1;min-width:180px}
+.nd-hi .greet{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:800}
+.nd-hi h2{font-size:1.5rem;margin:2px 0 3px;font-family:'Poppins';text-transform:none}
+.nd-hi .sub{font-size:.88rem;color:var(--muted)}
+.nd-pills{display:flex;gap:8px;flex-wrap:wrap}
+.nd-pill{font-size:.78rem;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:7px 12px;color:var(--muted)}
+.nd-pill strong{color:var(--ink);font-weight:700}
+.nd-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.nd-metric{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.nd-metric .m-l{font-size:.8rem;color:var(--muted);font-weight:600}
+.nd-metric .m-n{font-size:1.85rem;font-family:'Poppins';font-weight:700;color:var(--ink);line-height:1.1;margin-top:4px}
+.nd-metric.is-accent{border-color:rgba(74,155,47,.3);background:linear-gradient(180deg,rgba(74,155,47,.06),#fff)}
+.nd-metric.is-accent .m-n{color:var(--accent)}
+.nd-sec-title{font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px}
+.nd-qa{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:24px}
+.nd-qa a{display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;transition:background .15s}
+.nd-qa a:last-child{border-bottom:none}
+.nd-qa a:hover{background:rgba(74,155,47,.07)}
+.nd-qa a:hover .qa-t{color:var(--accent)}
+.nd-qa .qa-ic{width:38px;height:38px;border-radius:11px;background:rgba(74,155,47,.1);color:var(--accent);display:grid;place-items:center;flex:0 0 auto}
+.nd-qa .qa-ic svg{width:20px;height:20px}
+.nd-qa .qa-t{flex:1;font-weight:600;font-size:.96rem}
+.nd-qa .qa-ar{color:var(--muted);font-size:1.1rem}
+@media(max-width:640px){ .nd-metrics{grid-template-columns:1fr} }
+
+/* ===== Bestelldetail: neu strukturiert ===== */
+.od2-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 22px;margin-bottom:16px;box-shadow:0 14px 34px -28px rgba(47,93,52,.5)}
+.od2-total{text-align:right}
+.od2-total .l{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.od2-total .n{font-size:1.5rem;font-weight:700;font-family:'Poppins';line-height:1.1}
+.tl-fill{position:absolute;top:19px;left:8%;height:3px;background:var(--accent);z-index:0;border-radius:3px}
+.od2-info{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.od2-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.od2-card h3{font-size:.9rem;color:var(--muted);margin:0 0 8px;font-weight:700}
+@media(max-width:640px){ .od2-info{grid-template-columns:1fr} }
+
 /* ===== Agrarhero: komplett andere Struktur für Mitte/unten ===== */
 .ah2-about{padding:72px 0}
 .ah2-about .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center}
