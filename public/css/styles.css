@@ -1000,6 +1000,20 @@ html.dark .seg-opt,html.dark .cp-swatch,html.dark .gallery-thumbs .gthumb,html.d
 html.dark .sticky-actions,html.dark .slider-arrow,html.dark .tbl tr.grp-row td{
   background:var(--paper-2);border-color:var(--line);color:var(--ink)}
 
+/* Dark-Mode für die neu strukturierten Konto-Karten */
+html.dark .nd-head,html.dark .nd-metric,html.dark .nd-qa,html.dark .od2-head,html.dark .od2-card{
+  background:var(--paper-2);border-color:var(--line);color:var(--ink)}
+html.dark .nd-metric.is-accent{background:linear-gradient(180deg,rgba(74,155,47,.16),#131a11);border-color:rgba(74,155,47,.35)}
+html.dark .nd-pill{background:#10141a;border-color:var(--line)}
+html.dark .tl-dot{background:#141920;border-color:var(--line)}
+
+/* Dark-Mode für weitere zuvor fest weiße Flächen (Produktseite, Login, Karriere) */
+html.dark .auth2-form,html.dark .hl-chips .hchip,html.dark .usp-row .usp,html.dark .varpick .vp-opt,
+html.dark .doc-link,html.dark .addon-pick,html.dark .ch-chips span,html.dark .card .body .tmeta .tchip{
+  background:var(--paper-2);border-color:var(--line);color:var(--ink)}
+html.dark .hl-chips .hchip.is-warranty{background:linear-gradient(135deg,rgba(74,155,47,.2),rgba(47,93,52,.1));border-color:rgba(74,155,47,.4);color:#cfe9bd}
+html.dark .card .body .tmeta .tchip{color:#a9d98c}
+
 /* Eingabefelder */
 html.dark input,html.dark select,html.dark textarea,
 html.dark .field input,html.dark .field select,html.dark .field textarea,
