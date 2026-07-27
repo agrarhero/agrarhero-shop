@@ -159,6 +159,8 @@ ensureColumns('guest_visits', [
 
 // Bestehende Bestellungen auf die aktuelle Standard-Lieferzeit ziehen.
 try { db.prepare("UPDATE orders SET delivery_days='3-6' WHERE delivery_days='4-7'").run(); } catch (e) {}
+// FLIEGL WFW 4000: nur die vollen Ansichten in der Galerie (Teil-Nahaufnahmen entfernt).
+try { db.prepare("UPDATE products SET gallery=? WHERE slug='fliegl-wfw-4000'").run('[\"fliegl-wfw-4000-2.jpg\",\"fliegl-wfw-4000-3.jpg\"]'); } catch (e) {}
 
 db.transaction = (fn) => (...args) => {
   db.exec('BEGIN');
