@@ -1316,15 +1316,21 @@ html.dark .spam-hint{background:#241d12;border-color:#4a3a22;color:#e6cfa8}
 html.dark .spam-hint strong{color:#f0dcbb}
 
 /* Cookie-Hinweis unten */
-.cookie-bar{position:fixed;left:0;right:0;bottom:0;z-index:300;background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -8px 30px -18px rgba(10,14,20,.55)}
-.cookie-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
-.cookie-txt{font-size:.9rem;color:var(--muted);line-height:1.5;flex:1;min-width:240px}
-.cookie-txt strong{color:var(--ink)}
-.cookie-txt a{color:var(--accent);font-weight:600}
-.cookie-ok{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.7rem 1.5rem;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit;flex-shrink:0}
-.cookie-ok:hover{background:#c9551a}
-html.dark .cookie-bar{background:var(--paper-2);border-top-color:var(--line)}
-@media(max-width:560px){.cookie-inner{padding:12px 14px;gap:10px}.cookie-ok{width:100%}}
+.cc-card{position:fixed;left:20px;bottom:20px;z-index:400;width:400px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 26px 64px -20px rgba(20,40,20,.55);padding:22px 22px 20px}
+.cc-card .cc-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--steel),var(--accent));color:#fff;margin-bottom:13px}
+.cc-card .cc-ic svg{width:24px;height:24px}
+.cc-head{font-family:'Poppins';font-weight:700;font-size:1.14rem;color:var(--ink);margin-bottom:6px}
+.cc-body{font-size:.88rem;color:var(--muted);line-height:1.6;margin:0 0 16px}
+.cc-body a{color:var(--accent);font-weight:600}
+.cc-actions{display:flex;gap:10px}
+.cc-btn{flex:1;border-radius:10px;padding:.74rem 1rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;border:1px solid var(--line);transition:.15s;line-height:1}
+.cc-decline{background:#fff;color:var(--ink)}
+.cc-decline:hover{border-color:#c3c9d1;background:var(--paper-2)}
+.cc-accept{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 12px 24px -12px rgba(74,155,47,.85)}
+.cc-accept:hover{background:var(--accent-dark)}
+html.dark .cc-card{background:var(--paper-2);border-color:var(--line)}
+html.dark .cc-decline{background:#141920;color:var(--ink);border-color:var(--line)}
+@media(max-width:520px){.cc-card{left:12px;right:12px;bottom:12px;width:auto;padding:18px}}
 
 /* ==== Lagerbestand-Anzeige (nur Container) ==== */
 .stock{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;margin-top:4px}
