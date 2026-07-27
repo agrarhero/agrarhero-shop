@@ -28,6 +28,7 @@
         <a href="/agb">AGB</a>
         <a href="/datenschutz">Datenschutz</a>
         <a href="/agb#widerruf">Widerrufsrecht</a>
+        <a href="#" data-cc-open>Cookie-Einstellungen</a>
       </div>
     </div>
     <div class="foot-bottom">
@@ -55,20 +56,27 @@
   start();
 })();
 </script>
-<!-- Cookie-Hinweis (nur technisch notwendige Cookies) -->
-<div class="cookie-bar" id="cookieBar" hidden>
-  <div class="cookie-inner">
-    <span class="cookie-txt">Wir verwenden nur <strong>technisch notwendige Cookies</strong>, damit Login und Warenkorb funktionieren. Mehr dazu in der <a href="/datenschutz">Datenschutzerkl&auml;rung</a>.</span>
-    <button type="button" class="cookie-ok" id="cookieOk">Akzeptieren</button>
+<!-- Cookie-Einwilligung (Consent) mit Akzeptieren / Ablehnen -->
+<div class="cc-card" id="ccBar" hidden role="dialog" aria-label="Datenschutz-Einstellungen">
+  <span class="cc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+  <div class="cc-head">Datenschutz &amp; Cookies</div>
+  <p class="cc-body">Wir verwenden notwendige Cookies, damit Warenkorb und Login funktionieren. Mit &bdquo;Alle akzeptieren&ldquo; erlauben Sie zus&auml;tzlich Statistik- und Marketing-Cookies (z.&nbsp;B. von Google), sobald diese eingesetzt werden. Ihre Wahl k&ouml;nnen Sie jederzeit &uuml;ber &bdquo;Cookie-Einstellungen&ldquo; im Fu&szlig;bereich &auml;ndern. Mehr in der <a href="/datenschutz">Datenschutzerkl&auml;rung</a>.</p>
+  <div class="cc-actions">
+    <button type="button" class="cc-btn cc-decline" id="ccDecline">Nur notwendige</button>
+    <button type="button" class="cc-btn cc-accept" id="ccAccept">Alle akzeptieren</button>
   </div>
 </div>
 <script>
 (function(){
-  try{ if(localStorage.getItem('gb-cookie-ok')==='1') return; }catch(e){}
-  var bar=document.getElementById('cookieBar'); if(!bar) return;
-  bar.hidden=false;
-  var ok=document.getElementById('cookieOk');
-  if(ok) ok.addEventListener('click',function(){ try{localStorage.setItem('gb-cookie-ok','1');}catch(e){} bar.hidden=true; });
+  var KEY='ah-consent';
+  var bar=document.getElementById('ccBar'); if(!bar) return;
+  var choice=null; try{choice=localStorage.getItem(KEY);}catch(e){}
+  function grant(){ if(typeof gtag==='function'){ gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'}); } }
+  if(!choice){ bar.hidden=false; }
+  var a=document.getElementById('ccAccept'), d=document.getElementById('ccDecline');
+  if(a) a.addEventListener('click',function(){ try{localStorage.setItem(KEY,'all');}catch(e){} grant(); bar.hidden=true; });
+  if(d) d.addEventListener('click',function(){ try{localStorage.setItem(KEY,'necessary');}catch(e){} bar.hidden=true; });
+  document.addEventListener('click',function(e){ var t=e.target.closest && e.target.closest('[data-cc-open]'); if(t){ e.preventDefault(); bar.hidden=false; } });
 })();
 </script>
 </body>

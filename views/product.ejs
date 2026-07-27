@@ -13,6 +13,12 @@
   if (p.ratingCount && p.ratingCount > 0) { _ld.aggregateRating = {"@type":"AggregateRating","ratingValue":String(p.ratingAvg),"reviewCount":String(p.ratingCount)}; }
 %>
 <script type="application/ld+json"><%- JSON.stringify(_ld).replace(/</g,'\\u003c') %></script>
+<% var _catName = (typeof h!=='undefined' && h.groupLabel) ? h.groupLabel(p.group) : 'Sortiment';
+   var _bc = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+     {"@type":"ListItem","position":1,"name":"Startseite","item":_base+'/'},
+     {"@type":"ListItem","position":2,"name":_catName,"item":_base+'/produkte?gruppe='+p.group},
+     {"@type":"ListItem","position":3,"name":p.name,"item":_base+'/produkt/'+p.slug}]}; %>
+<script type="application/ld+json"><%- JSON.stringify(_bc).replace(/</g,'\\u003c') %></script>
 <% var _cstock = (p.stock != null) ? Number(p.stock) : null;
    var _gstock = (true && p.stock != null) ? Number(p.stock) : null;
    var _wv = (typeof user !== 'undefined' && user && user.min_order_waived) ? true : false;
