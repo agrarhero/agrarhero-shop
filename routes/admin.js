@@ -13,6 +13,7 @@ const geo = require('../lib/geo');
 const status = require('../lib/status');
 const cartlib = require('../lib/cart');
 const settingsLib = require('../lib/settings');
+const seller = require('../lib/seller');
 const presence = require('../lib/presence');
 const guestlog = require('../lib/guestlog');
 const ids = require('../lib/ids');
@@ -708,6 +709,30 @@ router.post('/einstellungen', requireAdmin, (req, res) => {
   settingsLib.set('fraud_watch_domains', (b.fraud_watch_domains || '').trim());
   req.flash('success', 'Einstellungen gespeichert.');
   res.redirect('/admin/einstellungen?ok=1');
+});
+
+// ---------- Impressum / Firmendaten (im Panel bearbeitbar, ohne Deploy) ----------
+router.get('/impressum', requireAdmin, (req, res) => {
+  res.render('admin/impressum', { title: 'Admin – Impressum', s: seller.info(), saved: req.query.ok === '1' });
+});
+router.post('/impressum', requireAdmin, (req, res) => {
+  const b = req.body;
+  const t = (x) => String(x == null ? '' : x).trim();
+  // Anschrift wird als "Straße Nr., PLZ Ort" gespeichert (erster Komma trennt Straße/Ort).
+  const addr = [t(b.seller_street), t(b.seller_city)].filter(Boolean).join(', ');
+  settingsLib.set('seller_name', t(b.seller_name));
+  settingsLib.set('seller_legalform', t(b.seller_legalform));
+  settingsLib.set('seller_address', addr);
+  settingsLib.set('seller_country', t(b.seller_country));
+  settingsLib.set('seller_manager', t(b.seller_manager));
+  settingsLib.set('seller_register_court', t(b.seller_register_court));
+  settingsLib.set('seller_register_no', t(b.seller_register_no));
+  settingsLib.set('seller_ustid', t(b.seller_ustid));
+  settingsLib.set('seller_email', t(b.seller_email));
+  settingsLib.set('seller_phone', t(b.seller_phone));
+  settingsLib.set('seller_web', t(b.seller_web));
+  req.flash('success', 'Impressum gespeichert.');
+  res.redirect('/admin/impressum?ok=1');
 });
 
 // ---------- Statistik-Dashboard ----------
