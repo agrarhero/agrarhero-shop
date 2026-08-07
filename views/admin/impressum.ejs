@@ -1,0 +1,43 @@
+<%- include('../partials/admin-header') %>
+<div style="margin-bottom:18px">
+  <h1 style="font-size:2rem">Impressum</h1>
+  <p style="color:var(--muted);font-size:.92rem">Hier änderst du die Firmen- und Impressumsdaten <b>selbst</b>, ohne den Shop neu ausrollen zu müssen. Die Angaben erscheinen automatisch auf der <a href="/impressum" target="_blank">Impressum-Seite</a>, im Fußbereich, in E-Mails und auf jeder Rechnung.</p>
+</div>
+
+<% if (saved) { %><div class="help-box" style="max-width:860px;background:#e8f6ee;border-color:#bfe6cd;color:#1f7a3f;margin-bottom:16px">✓ Impressum gespeichert. Die Änderungen sind sofort im ganzen Shop aktiv.</div><% } %>
+
+<form method="post" action="/admin/impressum" style="max-width:860px">
+
+  <div class="panel pe-card">
+    <h3>1 · Firma &amp; Anschrift</h3>
+    <label class="fld"><span>Firmenname (rechtlicher Verkäufer / Rechnungssteller)</span><input name="seller_name" value="<%= s.name %>" placeholder="WS - AGRARHANDEL GmbH"></label>
+    <label class="fld"><span>Rechtsform</span><input name="seller_legalform" value="<%= s.legalForm %>" placeholder="GmbH"></label>
+    <div class="grid2">
+      <label class="fld"><span>Straße &amp; Hausnummer</span><input name="seller_street" value="<%= s.street %>" placeholder="Erlenweg 13"></label>
+      <label class="fld"><span>PLZ &amp; Ort</span><input name="seller_city" value="<%= s.cityLine %>" placeholder="82110 Germering"></label>
+    </div>
+    <label class="fld"><span>Land</span><input name="seller_country" value="<%= s.country %>" placeholder="Deutschland"></label>
+  </div>
+
+  <div class="panel pe-card">
+    <h3>2 · Vertretung &amp; Register</h3>
+    <label class="fld"><span>Geschäftsführer</span><input name="seller_manager" value="<%= s.manager %>" placeholder="Wilhelm Schaich, Enrico Heyne, Gabriele Kumar"></label>
+    <p class="hint">Mehrere Geschäftsführer mit Komma trennen. Bei mehreren Namen wird automatisch „Geschäftsführer" (Plural) angezeigt.</p>
+    <div class="grid2">
+      <label class="fld"><span>Registergericht</span><input name="seller_register_court" value="<%= s.registerCourt %>" placeholder="Amtsgericht München"></label>
+      <label class="fld"><span>Registernummer</span><input name="seller_register_no" value="<%= s.registerNo %>" placeholder="HRB 268415"></label>
+    </div>
+    <label class="fld"><span>Umsatzsteuer-Identifikationsnummer (optional)</span><input name="seller_ustid" value="<%= s.ustid %>" placeholder="DE…"></label>
+  </div>
+
+  <div class="panel pe-card">
+    <h3>3 · Kontakt</h3>
+    <label class="fld"><span>E-Mail</span><input name="seller_email" value="<%= s.email %>" placeholder="info@agrarhero.de"></label>
+    <label class="fld"><span>Telefon (optional)</span><input name="seller_phone" value="<%= s.phone %>" placeholder="+49 89 45210988"></label>
+    <p class="hint">Leer lassen oder nur Nullen eintragen blendet die Telefonnummer aus. Ein hinterlegter .env-Wert bleibt als Fallback erhalten.</p>
+    <label class="fld"><span>Internet / Website</span><input name="seller_web" value="<%= s.web %>" placeholder="www.agrarhero.de"></label>
+  </div>
+
+  <div class="pe-actions"><button class="btn btn-accent" type="submit">Impressum speichern</button> <a class="btn btn-line" href="/impressum" target="_blank">Impressum ansehen</a></div>
+</form>
+<%- include('../partials/admin-footer') %>
